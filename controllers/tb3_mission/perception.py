@@ -118,8 +118,20 @@ class AppleDetector:
                     continue
                 bx, by, bw, bh = cv2.boundingRect(cnt)
                 aspect = bw / float(bh) if bh > 0 else 0
-                if aspect < 0.6 or aspect > 1.7:
+                # 사과는 거의 원형 (소화기 등 수직으로 긴 물체 배제)
+                if aspect < (0.70 if color == "red" else 0.60) or aspect > 1.45:
                     continue
+
+                # 소화기 배제 1: 사과는 바닥 위 독립된 구체이므로 위쪽에 붉은색 물체가 이어지지 않음.
+                # 소화기는 상단 실린더와 라벨로 인해 컨투어 위쪽 수직 영역에 붉은 픽셀이 다량 존재함.
+                top_y = max(0, by - 6)
+                if color == "red" and top_y > 0:
+                    x1 = max(0, bx - 15)
+                    x2 = min(CAM_W, bx + bw + 15)
+                    above_crop = mask[0:top_y, x1:x2]
+                    if cv2.countNonZero(above_crop) > 35:
+                        continue
+
                 (cx, cy), r_px = cv2.minEnclosingCircle(cnt)
                 if cy < self.floor_row:           # 탁자 위나 벽에 걸린 물체 제외
                     continue
@@ -138,6 +150,10 @@ class AppleDetector:
                 ly = dist * math.sin(bearing)
                 wx = x + math.cos(yaw) * lx - math.sin(yaw) * ly
                 wy = y + math.sin(yaw) * lx + math.cos(yaw) * ly
+
+                # 소화기 배제 2: 시작점 복도 벽면에 거치된 소화기 위치 (odom ~0.14, 0.66) 주변 배제
+                if color == "red" and math.hypot(wx - 0.14, wy - 0.66) < 0.9:
+                    continue
                 dets.append({
                     "color": color,
                     "world": (wx, wy),
