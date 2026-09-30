@@ -1,0 +1,24 @@
+{
+  "target_colors": ["red"],
+  "target_count": 2,
+  "forbidden_colors": ["green", "purple", "orange"],
+  "time_limit_s": 900.0,
+  "return_at_ratio": 0.7,
+
+  "v_max": 0.18,
+  "v_min": 0.08,
+  "w_max": 1.5,
+  "lookahead_m": 0.35,
+
+  "stop_dist_m": 0.25,
+  "slow_dist_m": 0.40,
+
+  "inflate_cells": 4,
+  "soft_cells": 8,
+
+  "approach_standoff_m": 0.35,
+  "approach_stop_m": 0.25,
+
+  "show_window": true,
+  "debug_ground_truth": false
+}
