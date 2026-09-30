@@ -1,6 +1,10 @@
+py -m pip install torch --index-url https://download.pytorch.org/whl/cu128
+py -m pip install gymnasium stable-baselines3 "numpy<2.3"
+py rl\train_mission_ppo.py --minutes 13 --tag win1 --deploy
+
+
 # PNU Robot Hackathon
-pip install torch --index-url https://download.pytorch.org/whl/cu128
-pip install gymnasium stable-baselines3 "numpy<2.3"
+
 Webots R2025a와 TurtleBot3 Burger를 사용하는 Autonomous Search and Rescue 프로젝트입니다.
 
 현재 단계의 목표는 다음 세 가지입니다.
