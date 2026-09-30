@@ -185,7 +185,7 @@ class OccupancyGrid:
             front = nxt_b.astype(np.uint8)
         return dist
 
-    def frontiers(self, costmap, pose, blacklist=(), now=0.0):
+    def frontiers(self, costmap, pose, blacklist=(), now=0.0, rescued=()):
         """점수순으로 정렬된 frontier 목표 후보 [(x, y, size, dist_m)]."""
         # 후보 셀은 장애물에서 충분히 떨어진 자유 셀만: 원거리 벽의 빔 간격 틈이 frontier로 잡히는 것을 막는다
         free = (costmap < self.frontier_max_cost)
@@ -231,7 +231,15 @@ class OccupancyGrid:
                     break
             if skip:
                 continue
-            score = size / (d_m + 1.0)
+            # 방/넓은 미탐색 구역(큰 frontier)을 강하게 우대
+            score = (size ** 1.3) / (d_m + 1.0)
+            # 이미 사과를 구출한 방/주변 영역(2.5m 이내)은 다른 미탐색 방 우선 탐색을 위해 감점
+            if rescued:
+                for r in rescued:
+                    rx, ry = (r["x"], r["y"]) if isinstance(r, dict) else (r[0], r[1])
+                    if (wx - rx) ** 2 + (wy - ry) ** 2 < 2.5 * 2.5:
+                        score *= 0.15
+                        break
             out.append((wx, wy, size, d_m, score))
         out.sort(key=lambda e: -e[4])
         return [(e[0], e[1], e[2], e[3]) for e in out]

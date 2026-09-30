@@ -20,6 +20,7 @@ from bt_core import (Status, Sequence, ReactiveSequence, ReactiveSelector,
                      Recovery, Condition, Action, BehaviorTree)
 from planner import plan_world, path_blocked
 from mapping import UNKNOWN
+from config import wrap_angle
 
 
 class MissionNodes:
@@ -43,6 +44,11 @@ class MissionNodes:
         self._goal_fail = {}
         self._home_fail = 0
         self._visual_t0 = None
+        self._scan_t0 = None
+        self._scan_prev_yaw = None
+        self._scan_accum_yaw = 0.0
+        self._scan_saw_target_t0 = None
+        self._path_target_t0 = None
         self._log = app.log
 
     # ---------- 편의 ----------
@@ -306,7 +312,8 @@ class MissionNodes:
     # ---------- Explore ----------
     def select_frontier(self):
         cm = self.app.costmap
-        fr = self.app.grid.frontiers(cm, self.pose(), self.app.blacklist, self.now())
+        fr = self.app.grid.frontiers(cm, self.pose(), self.app.blacklist, self.now(),
+                                     rescued=self.bb.get("rescued", []))
         if not fr:
             self._no_frontier += 1
             if self._no_frontier == 2 and not self._blacklist_cleared:
@@ -324,7 +331,7 @@ class MissionNodes:
         self.bb.set("goal", (x, y))
         self.bb.set("goal_kind", "frontier")
         self.bb.set("frontiers", fr[:12])
-        self.label(f"EXPLORE frontier ({x:.1f}, {y:.1f}) 크기={size} 거리={d:.1f}")
+        self.label(f"🍎 사과 탐색 이동 ({x:.1f}, {y:.1f})")
         return Status.SUCCESS
 
     def plan_explore(self):
@@ -422,12 +429,85 @@ class MissionNodes:
             if kind == "frontier" and self._follow_ticks % 24 == 0 and self._goal_observed():
                 self.app.motion.stop()
                 return Status.SUCCESS
+        # 주행 중 빨간 사과가 시야에 들어온 경우: 속도를 줄여 5프레임 확정을 돕는다
+        if kind == "frontier" and self.app.detector.last_target is not None:
+            t = self.now()
+            if self._path_target_t0 is None:
+                self._path_target_t0 = t
+            if t - self._path_target_t0 < 1.0:
+                self.label(f"🍎 사과 포착! 확정 대기 중... ({self.app.detector.last_target['dist']:.2f}m)")
+                self.app.motion.set_cmd(0.04, 0.0)
+                return Status.RUNNING
+        else:
+            self._path_target_t0 = None
+
         if kind == "frontier":
-            self.label(self.bb.get("state_label", "EXPLORE"))
+            self.label(self.bb.get("state_label", "🍎 사과 탐색 주행"))
         elif kind == "home":
             self.label("RETURN 복귀 주행")
         done = self.app.motion.follow(self.pose(), path)
         return Status.SUCCESS if done else Status.RUNNING
+
+    def scan_for_apple(self):
+        """방/frontier에 도착했을 때 제자리 360도 회전하며 빨간 사과를 능동 탐색한다.
+        카메라 FOV가 60도이므로 전진 주행만으로는 놓치기 쉬운 주변 방의 사과를 찾는다."""
+        # 1. 이미 목표가 확정되었거나 남은 목표가 없으면 성공 종료
+        if self.bb.get("detection") and self.bb.get("detection").get("confirmed"):
+            self.scan_reset()
+            return Status.SUCCESS
+        if not self.cond_targets_left():
+            self.scan_reset()
+            return Status.SUCCESS
+
+        t = self.now()
+        px, py, yaw = self.pose()
+
+        # 2. 회전 중 카메라에 빨간 사과가 감지되면 즉시 정지하고 5프레임 확정을 대기
+        target = self.app.detector.last_target
+        if target is not None:
+            self.app.motion.stop()
+            if self._scan_saw_target_t0 is None:
+                self._scan_saw_target_t0 = t
+                self._log(f"🍎 사과 발견! ({target['dist']:.2f}m) 확정 대기 중...")
+            self.label(f"🍎 사과 포착! 확정 대기 ({target['dist']:.2f}m)")
+            if self.bb.get("detection") and self.bb.get("detection").get("confirmed"):
+                self.scan_reset()
+                return Status.SUCCESS
+            if t - self._scan_saw_target_t0 > 1.5:
+                self._scan_saw_target_t0 = None
+            else:
+                return Status.RUNNING
+
+        self._scan_saw_target_t0 = None
+
+        if self._scan_t0 is None:
+            self._scan_t0 = t
+            self._scan_prev_yaw = yaw
+            self._scan_accum_yaw = 0.0
+
+        # 회전각 누적
+        dyaw = wrap_angle(yaw - self._scan_prev_yaw)
+        self._scan_accum_yaw += abs(dyaw)
+        self._scan_prev_yaw = yaw
+
+        deg = int(math.degrees(self._scan_accum_yaw))
+        # 360도(2*pi) 회전 완료 또는 12초 초과 시 탐색 완료
+        if self._scan_accum_yaw >= 2.0 * math.pi or (t - self._scan_t0) > 12.0:
+            self._log(f"🍎 360° 사과 탐색 회전 완료 ({deg}°) → 다음 구역으로 이동")
+            self.scan_reset()
+            return Status.SUCCESS
+
+        # 초당 약 0.55 rad (약 31.5도/s)로 부드러운 제자리 회전
+        self.app.motion.set_cmd(0.0, 0.55)
+        self.label(f"🍎 사과 탐색 회전 중 ({deg}°/360°)")
+        return Status.RUNNING
+
+    def scan_reset(self):
+        self._scan_t0 = None
+        self._scan_prev_yaw = None
+        self._scan_accum_yaw = 0.0
+        self._scan_saw_target_t0 = None
+        self.app.motion.stop()
 
     def _goal_observed(self):
         """frontier 목표 주변에 미관측 셀이 더 이상 없으면 True."""
@@ -476,6 +556,7 @@ def build_tree(app):
         Action("SelectFrontier", n.select_frontier),
         Action("PlanToGoal", n.plan_explore),
         Action("FollowPath", n.follow_path),
+        Action("ScanForApple", n.scan_for_apple, n.scan_reset),
     ])
 
     return_home = Sequence("ReturnHome", [Condition("ReturnHome?", n.cond_return_home)] + [
