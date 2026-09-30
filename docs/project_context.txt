@@ -1,0 +1,189 @@
+PNU AMR Search and Rescue Hackathon - Project Context
+======================================================
+
+이 파일은 다른 LLM에게 프로젝트 전체 맥락을 전달하기 위한 문서다.
+
+[1. 해커톤 목표]
+
+- 실제 로봇이 아니라 Webots 시뮬레이션에서 진행한다.
+- 주제는 Autonomous Search and Rescue다.
+- 로봇은 사전 정보가 없는 환경을 탐색한다.
+- 지정된 구조 대상(target)을 찾아 해당 위치까지 이동한다.
+- 이동 중 벽, 장애물, 움직이는 사람과 충돌하면 안 된다.
+- 모든 대상 처리 후 시작 지점으로 돌아와야 한다.
+- 평가는 목표 달성, 기술 구현, 주행 안정성, 창의성 기준이다.
+- 대상의 구체적인 형태/색상은 당일 공개될 예정이다.
+- 객체 탐지는 매우 복잡한 비전 문제가 아니라 단순한 작업으로 안내받았다.
+- 팀은 3~4명이고, 강의 2시간 + 해커톤 3시간이다.
+
+[2. 제공 정보 및 센서]
+
+- 로봇은 Differential Drive 방식이다. 좌우 바퀴 속도를 다르게 줘서 직진/회전을 제어한다.
+- 360도 2D LiDAR를 사용한다.
+- wheel encoder는 필수다.
+- IMU는 선택이지만 현재 구현에서는 사용하지 않는다.
+- compass는 사용하지 않는다.
+- GPS/GNSS는 사용하지 않는다.
+- 카메라는 목표물 객체 탐지 용도로만 사용한다.
+- LiDAR 데이터는 각도, 최대/최소 거리, 측정 거리, 측정 강도, 측정 개수 등의 구조를 가진다.
+- 현재 Webots 로봇은 TurtleBot3Burger이며 LDS-01 LiDAR와 카메라가 연결되어 있다.
+
+[3. 사용 환경]
+
+- Webots R2025a
+- Ubuntu 22.04 / Python 3.10 기준 (macOS에서도 개발 가능)
+- 현재 개발 컴퓨터는 macOS다.
+- 프로젝트 레포지토리:
+  https://github.com/banchan01/pnu-robot-hackathon
+- 로컬 경로:
+  /Users/minchan/projects/pnu-robot-hackathon
+- 참고 강사 레포:
+  https://github.com/kyu-rae-kim/PNU-TECHWEEK-260930
+- 참고 레포는 Webots 예제/강의용 구조를 보여주는 레포이고, 팀 레포에서 실제 작업한다.
+- Webots world 파일은 시뮬레이션 공간이다.
+- controller는 로봇의 뇌이며 Python 코드가 센서값을 읽고 바퀴 모터에 속도를 명령한다.
+- Webots 화면은 시뮬레이션을 관찰하는 창이다. 로봇을 마우스로 직접 운전하는 것이 주 목적이 아니다.
+
+[4. 현재 월드와 컨트롤러]
+
+- 월드 파일:
+  worlds/sensor_playground.wbt
+- 기본 로봇 컨트롤러:
+  controllers/amr_controller/amr_controller.py
+- 기존 컨트롤러 기능:
+  - 2D LiDAR 읽기
+  - 좌우 wheel encoder 읽기
+  - 카메라 해상도 확인
+  - W/A/S/D 수동 조작
+  - Space로 간단한 안전 자동주행 토글
+  - Q로 정지
+- 현재 컨트롤러는 compass/GPS를 사용하지 않는다.
+- SAFE_WANDER는 단순히 앞 장애물이 가까우면 좌우 중 더 넓은 쪽으로 회전하는 예제일 뿐이다.
+- 실제 해커톤 알고리즘은 아직 완성된 것이 아니다.
+
+[5. Webots 조작 팁]
+
+- 월드 전체가 이상해짐: Webots 상단 Reset Simulation 또는 Cmd+Shift+T
+- 카메라 시점만 이상해짐: Restore Viewpoint 또는 Ctrl+Shift+V
+- 시뮬레이션 재생/정지 버튼을 확인해야 한다.
+- 로봇을 Scene Tree에서 클릭한다고 키보드 조작이 되는 것은 아니다.
+- 키보드 조작을 시험할 때는 가운데 3D 시뮬레이션 화면을 클릭하고 W/A/S/D를 누른다.
+- 터치패드로 3D 시점을 조작하면 회전/이동이 헷갈릴 수 있으므로 Restore Viewpoint를 자주 사용한다.
+- Webots는 3D로 보이지만 사용하는 센서와 지도는 2D 기반이다. 2D LiDAR가 바닥 평면을 스캔한다.
+
+[6. 선택한 강화학습 방향]
+
+목표는 여러 가지 환경에서 다음 전체 미션을 강화학습시키는 것이다.
+
+  출발점 -> 목표물 탐색 -> 장애물 회피 -> 목표물 도착
+  -> 장애물 회피 -> 출발점 복귀
+
+학습 과정:
+
+1. 장애물 위치를 랜덤하게 배치한다.
+2. 목표물 위치도 랜덤하게 배치한다.
+3. 로봇을 출발점으로 리셋한다.
+4. LiDAR/encoder/목표 관련 정보를 관측값으로 준다.
+5. 강화학습 정책이 좌우 바퀴 속도를 결정한다.
+6. 충돌, 목표 도착, 시작점 복귀, 시간 초과로 보상을 계산한다.
+7. 에피소드를 끝내고 월드를 다시 리셋한다.
+8. 이 과정을 GPU 서버에서 반복한다.
+
+보상 예시:
+
+- 목표물에 가까워짐: 작은 보상
+- 목표물 발견/도착: 큰 보상
+- 출발점으로 복귀: 매우 큰 보상
+- 장애물 충돌: 큰 감점
+- 너무 오래 걸림: 시간 감점
+- 가만히 있음: 감점
+
+강화학습은 목표물까지 갔다가 돌아오는 전체 미션을 대상으로 한다. 이전에 설명한
+"일반 알고리즘과 강화학습을 나눈다"는 것은 필수 결정이 아니라 안정성을 위한 선택지였고,
+현재 사용자의 의도는 전체 미션을 다양한 월드에서 강화학습시키는 것이다.
+
+[7. GPU 서버와 로그인]
+
+- 학교 RTX GPU 서버는 학습을 빠르게 하기 위해 사용한다.
+- GPU 서버에서 GPT 로그인은 필요 없다.
+- 코드를 직접 서버에 복사/clone하고 SSH나 파일 전송으로 결과 모델을 가져오면 된다.
+- GPU 사용에는 CUDA/PyTorch가 필요할 수 있다.
+- Webots 시뮬레이션 자체와 신경망 학습 프로세스를 분리할 수도 있다.
+- 학습된 모델 파일을 다시 노트북으로 가져와 Webots에서 실행한다.
+- 사용자는 모든 commit/push를 직접 하길 원한다. LLM은 commit/push하지 않는다.
+
+[8. 현재 추가된 강화학습 준비 파일]
+
+- controllers/amr_controller/rl_interface.py
+  - MissionState 데이터 구조
+  - LiDAR를 36개 섹터로 downsample하는 observation()
+  - 목표 거리/방향, 시작점 거리, 목표 발견 여부 포함
+  - collision/목표 도착/진행도 기반 reward()
+
+- controllers/mission_supervisor/mission_supervisor.py
+  - Webots Supervisor controller
+  - DEF 노드 이름으로 로봇/장애물/목표물을 찾는다.
+  - 새 에피소드 시작 시 장애물과 목표물을 랜덤 배치한다.
+  - 로봇을 시작 위치로 되돌리고 물리 상태를 리셋한다.
+  - 목표 위치와 시작 위치를 Emitter로 로봇에 전달한다.
+  - Supervisor 키보드 포커스가 있을 때 R을 누르면 새 에피소드가 시작된다.
+
+- worlds/sensor_playground.wbt 변경 사항
+  - Supervisor 역할의 Robot 노드 추가 (supervisor TRUE)
+  - RANDOM_OBSTACLE, RESCUE_TARGET, AMR DEF 이름 추가
+  - 로봇 extensionSlot에 mission receiver 추가
+
+- controllers/amr_controller/amr_controller.py 변경 사항
+  - mission receiver로 Supervisor의 reset 메시지를 받는다.
+  - wheel encoder 기반의 간단한 odometry를 계산한다.
+  - 목표 거리/방향과 시작점까지의 거리를 출력한다.
+  - 목표 30cm 이내 접근 시 target_found=True로 표시한다.
+
+- rl/README.md
+  - 강화학습 연결 흐름과 다음 작업을 설명한다.
+
+[9. 중요한 현재 한계]
+
+- 현재 목표물 발견은 카메라 객체 탐지가 아니라 Supervisor가 알려준 목표 좌표와의 거리로 임시 판정한다.
+- 대회에서는 이 부분을 카메라 객체 탐지 결과로 바꿔야 한다.
+- 현재 odometry는 encoder 기반 단순 추정이며 drift가 생긴다.
+- 실제 SLAM/scan matching/occupancy grid map은 아직 구현되지 않았다.
+- 현재 Supervisor는 R 키 기반 수동 에피소드 리셋까지 준비된 상태다.
+- PPO/DQN 학습 스크립트와 Webots-Gym 완전 자동 연결은 아직 구현해야 한다.
+- 월드가 실제로 실행되지 않으면 Webots에서 sensor_playground.wbt를 다시 열고 콘솔 오류를 먼저 확인한다.
+- Python 파일들은 py_compile 문법 검사를 통과했다.
+
+[10. 다음 작업 우선순위]
+
+1. Webots에서 수정된 sensor_playground.wbt를 다시 열기
+2. Supervisor와 amr_controller 콘솔에 reset/goal/start 로그가 나오는지 확인
+3. R 키로 장애물/목표물 랜덤 배치가 바뀌는지 확인
+4. 목표물 발견을 카메라 기반으로 교체할 수 있도록 간단한 객체 탐지 규칙 정의
+5. 실제 미션 상태를 EXPLORE -> TARGET_FOUND -> RETURN -> DONE으로 관리
+6. Gymnasium 호환 환경 또는 Webots 외부 학습 연결 작성
+7. PPO 학습 스크립트 작성
+8. 짧은 학습으로 정책이 움직이는지 검증
+9. GPU 서버에서 대량 학습
+10. 학습 모델을 Webots 대회 실행 컨트롤러에 연결
+
+[11. 다른 LLM에게 요청할 때의 핵심]
+
+이 프로젝트는 Webots R2025a의 TurtleBot3Burger 기반 Autonomous Search and Rescue다.
+사용 센서는 2D LiDAR와 wheel encoder이며 GPS와 compass는 쓰지 않는다. 카메라는 객체
+탐지용이다. 목표는 다양한 랜덤 환경에서 목표물을 찾아갔다가 시작점으로 돌아오는 전체
+미션을 강화학습시키는 것이다. GPU 서버는 학습용이다. 먼저 현재 레포의 파일과 위 한계를
+확인한 뒤, Webots가 실제로 실행되는지 검증하고, 그 다음 PPO 학습 연결을 구현해야 한다.
+
+[12. 강의에서 추가로 확인한 SLAM/Localization 전제]
+
+- 강의 슬라이드 주제는 "SLAM: Localization"이다.
+- 위치 추정은 Prediction & Update cycle(예측 및 업데이트 반복)로 설명되었다.
+- Kidnapped Robot Problem(로봇을 갑자기 들어서 다른 위치에 내려놓는 문제)은 다루지 않는다.
+- 로봇의 이동은 연속적이라고 가정한다.
+- 시작할 때 로봇의 Initial Position과 Orientation(초기 위치와 방향)은 알고 있다.
+- 따라서 Odometry만으로도 위치 추정이 가능한 조건으로 설명되었다.
+- 이 프로젝트에서는 encoder 기반 이동량으로 위치를 예측하고, LiDAR scan matching 등으로
+  위치를 보정하는 방향을 고려할 수 있다.
+- SLAM 지도 예시는 로봇이 이동하면서 위치 추정과 지도 업데이트를 반복하는 형태다.
+- 이 전제는 강화학습에도 중요하다. 학습 환경에서 로봇을 매 에피소드 시작 위치로 놓고,
+  중간에 순간이동시키지 않으면 시작점 복귀 학습을 단순화할 수 있다.

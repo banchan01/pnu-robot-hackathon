@@ -8,9 +8,20 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/project
 
 WorldInfo {
 }
+DEF MISSION_SUPERVISOR Robot {
+  children [
+    Emitter {
+      name "mission emitter"
+      channel 7
+      bufferSize 1024
+    }
+  ]
+  controller "mission_supervisor"
+  supervisor TRUE
+}
 Viewpoint {
-  orientation -0.23090429863285805 -0.01018523501343265 0.972923155167246 3.245268365009745
-  position 5.5 0.3 3.2
+  orientation -0.12667633697524244 0.01731548493348763 0.991792962080319 2.9046393511546507
+  position 4.661001937223952 -2.5573731226385625 1.418335440326754
 }
 TexturedBackground {
 }
@@ -20,8 +31,24 @@ RectangleArena {
   floorSize 6 6
   wallHeight 0.25
 }
-Solid {
-  translation 0.6 0 0.35
+DEF START_PAD Solid {
+  translation -2 -1.5 0.001
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.5 0
+        roughness 0.8
+        metalness 0
+      }
+      geometry Box {
+        size 0.7 0.7 0.002
+      }
+    }
+  ]
+  name "start pad"
+}
+DEF CENTER_WALL Solid {
+  translation 0.3 0 0.35
   children [
     Shape {
       appearance PBRAppearance {
@@ -30,17 +57,57 @@ Solid {
         metalness 0
       }
       geometry Box {
-        size 0.25 2.5 0.7
+        size 0.2 2.2 0.7
       }
     }
   ]
   name "center wall"
   boundingObject Box {
-    size 0.25 2.5 0.7
+    size 0.2 2.2 0.7
   }
 }
-Solid {
-  translation -1.2 1 0.25
+DEF EXTRA_WALL Solid {
+  translation -0.8 -0.8 0.35
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.3 0.3 0.5
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 1.4 0.2 0.7
+      }
+    }
+  ]
+  name "extra wall"
+  boundingObject Box {
+    size 1.4 0.2 0.7
+  }
+}
+DEF PILLAR_1 Solid {
+  translation 1.2 -1.2 0.35
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.5 0.25 0.2
+        roughness 1
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.7
+        radius 0.25
+      }
+    }
+  ]
+  name "pillar 1"
+  boundingObject Cylinder {
+    height 0.7
+    radius 0.25
+  }
+}
+DEF RANDOM_OBSTACLE Solid {
+  translation 0.1073322832689908 -0.11373124087517944 0.25
   children [
     Shape {
       appearance PBRAppearance {
@@ -49,51 +116,45 @@ Solid {
         metalness 0
       }
       geometry Box {
-        size 0.8 0.8 0.5
+        size 0.7 0.7 0.5
       }
     }
   ]
   name "box obstacle"
   boundingObject Box {
-    size 0.8 0.8 0.5
+    size 0.7 0.7 0.5
   }
 }
-Solid {
-  translation 1.9 1.8 0.12
+DEF RESCUE_TARGET Solid {
+  translation 1.4918673236351627 0.05470264506762024 0.16
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.1 0.8 0.2
-        roughness 0.7
+        baseColor 0 0.9 0.15
+        roughness 0.4
         metalness 0
       }
       geometry Sphere {
-        radius 0.12
+        radius 0.16
       }
     }
   ]
   name "green rescue target"
   boundingObject Sphere {
-    radius 0.12
+    radius 0.16
   }
 }
-TurtleBot3Burger {
-  hidden position_0_0 -1.5996972764817634e-11
-  hidden position_0_1 1.229491787793048e-11
-  hidden position_0_2 1.0372705852394347e-06
-  hidden position2_0_2 0.0002183094468243919
-  hidden position3_0_2 -3.2745602173525966e-07
-  hidden linearVelocity_0 -2.762361603503342e-15 -1.2461392997094017e-15 5.938609979156614e-17
-  hidden angularVelocity_0 1.5831631428830015e-15 1.9818970244714743e-16 8.908232045571071e-17
-  hidden linearVelocity_9 1.1045758809974947e-17 2.2608587983065314e-15 6.245392359633323e-17
-  hidden angularVelocity_9 1.996087914323768e-14 2.758497060871236e-16 6.642013388353801e-17
-  hidden linearVelocity_10 1.886610261757335e-17 -3.3575591129427453e-15 -6.856724113589023e-16
-  hidden angularVelocity_10 2.5101880704004088e-14 5.613330494387006e-16 5.856109337495205e-17
-  hidden rotation_11 0.004751154743684214 0.9999875890489859 -0.001499425422593587 0.00021831215635787299
-  hidden linearVelocity_11 5.573787659566785e-15 -1.1848912213794067e-15 -2.5365751854119846e-15
-  hidden angularVelocity_11 2.9622279541833057e-13 1.3934468681968435e-12 -3.445667948983759e-32
-  translation -1.9999999995045639 -1.500000000520593 -0.0002477392059891878
-  rotation -0.0021116496071761116 -0.9999977704541831 4.7539006656905314e-06 0.004641946780163548
+DEF AMR TurtleBot3Burger {
+  hidden position_0_0 50.29237481211233
+  hidden position_0_1 66.0095174807004
+  hidden position_0_2 -44.74886360746955
+  hidden position2_0_2 -0.8389572378726391
+  hidden position3_0_2 424.58117646364894
+  hidden rotation_10 0 -1 0 1.543903645388352
+  hidden rotation_11 -1.7302647462445048e-07 0.9999999999998521 -5.156661583329373e-07 3.177882718363627
+  hidden rotation_12 -0.30727165328771483 0.44683136656083716 0.8401939424580548 3.8435014993740473
+  translation -1.6629811542437942 -1.754432917649405 -0.0002477392066553702
+  rotation -0.0023213810099626136 -0.00019213911472599978 -0.9999972871327039 2.9722190789838434
   controller "amr_controller"
   extensionSlot [
     Camera {
@@ -103,6 +164,11 @@ TurtleBot3Burger {
       height 240
     }
     RobotisLds01 {
+    }
+    Receiver {
+      name "mission receiver"
+      channel 7
+      bufferSize 1024
     }
   ]
 }
