@@ -260,7 +260,7 @@
 
   <!-- ================= 오른쪽: 출동 모드 · 직접 지휘 · 로그 ================= -->
   <div class="col right">
-    <div class="card"><h2>출동 모드</h2><div class="modes" id="modes"></div></div>
+    <div class="card"><h2>모드</h2><div class="modes" id="modes"></div></div>
     <div class="card">
       <h2>직접 지휘</h2>
       <div class="row" style="margin-bottom:6px">
@@ -542,7 +542,7 @@
     const key = JSON.stringify(modes) + "|" + current; if (key === state.modesKey) return; state.modesKey = key;
     const box = $("modes"); box.innerHTML = "";
     modes.forEach(m => { const b = document.createElement("button"); b.className = "mode " + (m.tone || "") + (m.id === current ? " active" : "");
-      b.innerHTML = `<div class="t"><span>${m.icon || ""}</span><span>${m.label}</span></div><div class="d">${m.description}</div>`; b.title = m.commands.join(" → "); b.onclick = () => setMode(m.id); box.appendChild(b); });
+      b.innerHTML = `<div class="t">${m.icon ? `<span>${m.icon}</span>` : ""}<span>${m.label}</span></div><div class="d">${m.description}</div>`; b.title = m.commands.join(" → "); b.onclick = () => setMode(m.id); box.appendChild(b); });
     $("modePill").textContent = "모드: " + (current ? ((modes.find(m => m.id === current) || {}).label || current) : "미지정");
   }
 

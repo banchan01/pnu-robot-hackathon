@@ -4,7 +4,6 @@
     {
       "id": "rapid",
       "label": "신속 구조",
-      "icon": "⚡",
       "tone": "primary",
       "description": "연기가 짙어지는 상황. 가장 가까운 요구조자 1명만 확인하고 즉시 복귀한다.",
       "commands": [
@@ -15,7 +14,6 @@
     {
       "id": "hold",
       "label": "현 위치 대기",
-      "icon": "⏸",
       "tone": "neutral",
       "description": "지휘관 지시가 있을 때까지 제자리에서 정지한다. 지도 갱신은 계속된다.",
       "commands": [
@@ -25,7 +23,6 @@
     {
       "id": "emergency_evac",
       "label": "긴급 철수",
-      "icon": "🚨",
       "tone": "critical",
       "description": "화재 확산 또는 붕괴 위험. 진행 중인 임무를 중단하고 진입 지점으로 즉시 복귀한다.",
       "commands": [
