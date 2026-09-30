@@ -1,7 +1,6 @@
-py -m pip install torch --index-url https://download.pytorch.org/whl/cu128
-py -m pip install gymnasium stable-baselines3 "numpy<2.3"
-py rl\train_mission_ppo.py --minutes 13 --tag win1 --deploy
-
+git add rl\amr_ppo_model.zip rl\amr_win1_ppo_model.zip rl\amr_win1_policy.pt rl\best_win1_model rl\logs
+git commit -m "feat(rl): windows gpu 13min mission model"
+git push origin windows-gpu-train
 
 # PNU Robot Hackathon
 
