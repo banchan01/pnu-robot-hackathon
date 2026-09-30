@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(HERE, "static")
 MODES_FILE = os.path.join(HERE, "modes.json")
+COMMAND_TTL_S = 15.0          # 이 시간 안에 컨트롤러가 읽지 않은 명령은 폐기
 
 
 class Console:
@@ -119,7 +120,7 @@ class Console:
         if not command:
             return
         with self.lock:
-            self.queue.append(command)
+            self.queue.append((command, time.time()))
             self.command_log.append({"wall_time": time.time(), "command": command, "source": source})
 
     def _pump(self):
@@ -131,7 +132,11 @@ class Console:
                 try:
                     if os.path.exists(self.command_file) and os.path.getsize(self.command_file) > 0:
                         continue          # 컨트롤러가 아직 이전 명령을 읽지 않았다
-                    cmd = self.queue.popleft()
+                    cmd, ts = self.queue.popleft()
+                    if time.time() - ts > COMMAND_TTL_S:
+                        # 컨트롤러가 오랫동안 읽지 않은 명령은 버린다 (뒤늦게 시작한 컨트롤러에 전달되면 위험)
+                        self.command_log.append({"wall_time": time.time(), "command": cmd, "source": "expired"})
+                        continue
                     with open(self.command_file, "w", encoding="utf-8") as f:
                         f.write(cmd + "\n")
                 except OSError:
@@ -149,7 +154,7 @@ class Console:
         except (OSError, ValueError):
             pass
         with self.lock:
-            pending = list(self.queue)
+            pending = [c for (c, _) in self.queue]
             log = list(self.command_log)[-30:]
         data["_server"] = {
             "connected": age is not None and age < 3.0,
@@ -165,8 +170,8 @@ class Console:
         }
         return data
 
-    def file(self, name):
-        path = os.path.join(self.output_dir, name)
+    def file(self, name, path=None):
+        path = path or os.path.join(self.output_dir, name)
         try:
             with open(path, "rb") as f:
                 return f.read()
@@ -192,8 +197,55 @@ class Handler(BaseHTTPRequestHandler):
     def _json(self, obj, code=HTTPStatus.OK):
         self._send(code, json.dumps(obj, ensure_ascii=False).encode("utf-8"), "application/json; charset=utf-8")
 
+    STREAM_FILES = {"camera": ("live_cam.jpg", "image/jpeg"), "top": ("live_top.jpg", "image/jpeg"),
+                    "map": ("live_map.png", "image/png")}
+
+    def _stream(self, key):
+        """multipart/x-mixed-replace 스트림. 파일이 바뀔 때마다 즉시 한 장을 밀어준다 (브라우저 폴링 불필요)."""
+        name, ctype = self.STREAM_FILES[key]
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Connection", "close")
+        self.end_headers()
+        last_m = None
+        idle = 0.0
+        try:
+            while True:
+                path = os.path.join(CONSOLE.output_dir, name)
+                try:
+                    m = os.path.getmtime(path)
+                except OSError:
+                    time.sleep(0.2)
+                    continue
+                if m == last_m:
+                    time.sleep(0.02)
+                    idle += 0.02
+                    if idle > 2.0:            # 갱신이 멈춰도 연결 유지용으로 같은 장을 다시 보낸다
+                        idle = 0.0
+                        last_m = None
+                    continue
+                body = CONSOLE.file(name, path=path)
+                if body is None:
+                    time.sleep(0.05)
+                    continue
+                last_m = m
+                idle = 0.0
+                self.wfile.write(b"--frame\r\n")
+                self.wfile.write(f"Content-Type: {ctype}\r\nContent-Length: {len(body)}\r\n\r\n".encode())
+                self.wfile.write(body)
+                self.wfile.write(b"\r\n")
+                self.wfile.flush()
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            return
+
     def do_GET(self):
         p = urlparse(self.path).path
+        if p.startswith("/api/stream/"):
+            key = p.rsplit("/", 1)[1]
+            if key in self.STREAM_FILES:
+                return self._stream(key)
+            return self._send(HTTPStatus.NOT_FOUND, b"", "text/plain")
         if p in ("/", "/index.html"):
             with open(os.path.join(STATIC, "index.html"), "rb") as f:
                 return self._send(HTTPStatus.OK, f.read(), "text/html; charset=utf-8")

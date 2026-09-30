@@ -291,20 +291,23 @@
     refreshImages(true);
   });
 
-  let imgTick = 0;
-  function loadImg(img, url, onOk) {
-    const n = Date.now();
+  // 영상은 서버가 파일 갱신 때마다 밀어주는 MJPEG 스트림으로 받는다 (폴링 없음). 끊기면 1초 뒤 재연결.
+  const STREAM = { robot: "/api/stream/camera", top: "/api/stream/top", map: "/api/stream/map" };
+  function attachStream(img, url, onOk) {
+    if (img._streamUrl === url && img._alive) return;
+    img._streamUrl = url; img._alive = true;
     img.onload = () => { img.classList.add("ready"); if (onOk) onOk(); };
-    img.onerror = () => {};
-    img.src = url + "?" + n;
+    img.onerror = () => { img._alive = false; setTimeout(() => { if (img._streamUrl === url) attachStream(img, url, onOk); }, 1000); };
+    img.src = url + "?" + Date.now();
   }
   function refreshImages(force) {
-    if (!force && imgTick++ % 2) return;
-    const src = { robot: "/api/camera.jpg", top: "/api/top.jpg", map: "/api/map.png" }[state.view];
-    loadImg($("stageImg"), src, () => { $("stageEmpty").style.display = "none"; });
+    if (force) { const im = $("stageImg"); im._streamUrl = null; }
+    attachStream($("stageImg"), STREAM[state.view], () => { $("stageEmpty").style.display = "none"; });
     const m = $("mapSmall").querySelector("img");
-    loadImg(m, "/api/map.png", () => { $("mapSmall").querySelector(".empty").style.display = "none"; });
+    attachStream(m, STREAM.map, () => { $("mapSmall").querySelector(".empty").style.display = "none"; });
   }
+  // 컨트롤러가 재시작되어 출력 폴더가 바뀌면 스트림을 다시 연다
+  let lastOutputDir = null;
 
   // ---------- 지도 마커 ----------
   function worldToPct(x, y) {
@@ -459,6 +462,8 @@
     const conn = $("conn"); conn.className = "pill " + (srv.connected ? "on" : "off");
     conn.lastChild.textContent = srv.connected ? "로봇 연결됨" : (srv.status_age_s == null ? "컨트롤러 대기" : `수신 끊김 (${srv.status_age_s}s)`);
     renderModes(srv.modes || [], srv.current_mode);
+    if (srv.output_dir && lastOutputDir && srv.output_dir !== lastOutputDir) { $("stageImg")._streamUrl = null; $("mapSmall").querySelector("img")._streamUrl = null; refreshImages(false); }
+    lastOutputDir = srv.output_dir || lastOutputDir;
     $("tabTop").disabled = !srv.top_view; $("tabTop").title = srv.top_view ? "" : "월드에 overhead_cam 노드가 없거나 아직 프레임이 없습니다";
     $("pending").textContent = (srv.pending_commands && srv.pending_commands.length) ? "전송 대기: " + srv.pending_commands.join(" → ") : "";
     if (srv.drive_mode && srv.drive_mode !== state.drive && !manualTimer) { state.drive = srv.drive_mode;

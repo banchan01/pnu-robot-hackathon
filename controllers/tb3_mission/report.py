@@ -70,6 +70,8 @@ class Reporter:
         img[cm == LETHAL] = 0
         img[cm == UNKNOWN] = 150
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        seen = (cm == 0) & self.grid.viewed
+        img[seen] = (235, 245, 225)          # 카메라가 훑은 자유 공간은 연한 초록빛
         img = cv2.flip(img, 0)
         img = cv2.resize(img, None, fx=self.scale, fy=self.scale, interpolation=cv2.INTER_NEAREST)
 
@@ -112,7 +114,7 @@ class Reporter:
         lines = [
             f"t={bb.get('t', 0):.0f}s  {bb.get('state_label', '')}  {bb.get('wait_label', '') if bb.get('safety_level') == 'blocked' else ''}",
             f"targets_left={bb.get('targets_left')}  rescued={len(bb.get('rescued', []))}  "
-            f"explored={self.grid.explored_ratio() * 100:.1f}%",
+            f"explored={self.grid.explored_ratio() * 100:.1f}% viewed={self.grid.viewed_ratio() * 100:.0f}%",
             f"cmd={bb.get('command_state')}  safety={bb.get('safety_level')}  front={bb.get('front_min', 0):.2f}m",
         ]
         if gt and pose:

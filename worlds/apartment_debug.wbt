@@ -950,8 +950,8 @@ Robot {
       rotation 0 1 0 1.5708
       name "top_camera"
       fieldOfView 1.7
-      width 640
-      height 480
+      width 480
+      height 360
     }
   ]
 }

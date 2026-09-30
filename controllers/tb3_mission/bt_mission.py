@@ -11,6 +11,7 @@ Root: ReactiveSequence
     ├─ ForcedReturn: Sequence [조건, ReturnHome...]
     ├─ Approach:     Sequence [조건, ProtectTarget, PlanToStandoff, FollowPath, VisualApproach, MarkRescued]
     ├─ Explore:      Sequence [조건, SelectFrontier, PlanToGoal(unknown 허용), FollowPath]
+    ├─ Sweep:        Sequence [조건(frontier 소진, 목표 남음), SelectSweepGoal, PlanToGoal, FollowPath, Rotate360]
     ├─ ReturnHome:   Sequence [조건, PlanHome, FollowPath, AlignToStartYaw, Finish]
     └─ Idle
 """
@@ -42,6 +43,10 @@ class MissionNodes:
         self._escape_dir = 1.0
         self._goal_fail = {}
         self._home_fail = 0
+        self._no_sweep = 0
+        self._progress_ref = None
+        self._rot_prev = None
+        self._rot_acc = 0.0
         self._visual_t0 = None
         self._log = app.log
 
@@ -179,7 +184,59 @@ class MissionNodes:
             return True
         if not self.cond_targets_left():
             return True
-        return bool(self.bb.get("frontier_exhausted"))
+        return bool(self.bb.get("frontier_exhausted")) and bool(self.bb.get("sweep_exhausted"))
+
+    def cond_sweep(self):
+        return (self.cond_targets_left() and bool(self.bb.get("frontier_exhausted"))
+                and not bool(self.bb.get("sweep_exhausted")))
+
+    # ---------- Sweep (카메라 미관측 구역 방문 + 360도 회전) ----------
+    def select_sweep_goal(self):
+        cm = self.app.costmap
+        tg = self.app.grid.sweep_targets(cm, self.pose(), self.app.blacklist, self.now())
+        if not tg:
+            self._no_sweep += 1
+            if self._no_sweep >= 3:
+                if not self.bb.get("sweep_exhausted"):
+                    self._log(f"카메라 스윕 완료 (시야 커버율 {self.app.grid.viewed_ratio()*100:.0f}%) → 복귀")
+                self.bb.set("sweep_exhausted", True)
+            self.app.motion.stop()
+            return Status.FAILURE
+        self._no_sweep = 0
+        x, y, size, d = tg[0]
+        self.bb.set("goal", (x, y))
+        self.bb.set("goal_kind", "sweep")
+        self.bb.set("frontiers", tg[:12])
+        self.label(f"SWEEP 미관측 구역 ({x:.1f}, {y:.1f}) 크기={size} 거리={d:.1f}")
+        return Status.SUCCESS
+
+    def plan_sweep(self):
+        s = self._plan(allow_unknown=False, quiet=True)
+        if s == Status.FAILURE:
+            s = self._plan(allow_unknown=True, quiet=True)
+        if s == Status.FAILURE:
+            self.app.blacklist_goal(self.bb.get("goal"))
+        return s
+
+    def rotate_360(self):
+        m = self.app.motion
+        yaw = self.pose()[2]
+        if self._rot_prev is None:
+            self._rot_prev = yaw
+            self._rot_acc = 0.0
+        d = (yaw - self._rot_prev + math.pi) % (2 * math.pi) - math.pi
+        self._rot_acc += abs(d)
+        self._rot_prev = yaw
+        self.label(f"SWEEP 제자리 회전 {math.degrees(self._rot_acc):.0f}deg")
+        if self._rot_acc >= 2 * math.pi:
+            m.stop()
+            self._rot_prev = None
+            return Status.SUCCESS
+        m.set_cmd(0.0, 0.8)
+        return Status.RUNNING
+
+    def rotate_reset(self):
+        self._rot_prev = None
 
     # ---------- Approach ----------
     def protect_target(self):
@@ -288,6 +345,7 @@ class MissionNodes:
         if t - self._pause_t0 >= float(self.cfg["rescue_pause_s"]):
             self._pause_t0 = None
             self.bb.set("frontier_exhausted", False)
+            self.bb.set("sweep_exhausted", False)
             self.bb.set("mode", None)
             self.bb.set("last_announced", None)
             self.app.clear_blacklist()
@@ -380,6 +438,9 @@ class MissionNodes:
         return Status.RUNNING
 
     # ---------- 공통 ----------
+    def follow_reset(self):
+        self._progress_ref = None
+
     def _plan(self, allow_unknown, quiet=False):
         px, py, _ = self.pose()
         goal = self.bb.get("goal")
@@ -393,6 +454,7 @@ class MissionNodes:
         self.bb.set("replan", False)
         self.app.motion.reset_path()
         self._follow_ticks = 0
+        self._progress_ref = None
         return Status.SUCCESS
 
     def follow_path(self):
@@ -405,6 +467,24 @@ class MissionNodes:
             return Status.FAILURE
         self._follow_ticks += 1
         kind = self.bb.get("goal_kind")
+        # 진전 감시: 20초 동안 15 cm도 못 움직이면 (제자리 회전 루프 등) 실패 처리
+        px, py, _ = self.pose()
+        t = self.now()
+        if self._progress_ref is None:
+            self._progress_ref = (t, px, py)
+        elif math.hypot(px - self._progress_ref[1], py - self._progress_ref[2]) > 0.15:
+            self._progress_ref = (t, px, py)
+        elif t - self._progress_ref[0] > 20.0:
+            self._log(f"경로 추종 20초간 진전 없음 (cmd_w={self.app.motion.cmd_w:+.2f}) → 목표 포기·재계획")
+            self._progress_ref = None
+            self.app.stats["replans"] += 1
+            self.app.motion.stop()
+            self._blacklist_current_goal()
+            if kind in ("frontier", "sweep"):
+                self.app.blacklist_goal(self.bb.get("goal"))
+            return Status.FAILURE
+        if kind != "frontier":
+            self.label(f"FOLLOW {kind} ({len(path)} wp, idx {self.app.motion._idx})")
         if self._follow_ticks % 8 == 0:
             if path_blocked(path, self.app.grid, self.app.costmap, self.app.motion._idx, self.pose()):
                 self._log("경로가 새 장애물에 막힘 → 재계획")
@@ -444,7 +524,7 @@ def build_tree(app):
 
     return_seq = [
         Action("PlanHome", n.plan_home),
-        Action("FollowPath", n.follow_path),
+        Action("FollowPath", n.follow_path, n.follow_reset),
         Action("AlignToStartYaw", n.align_home),
         Action("Finish", n.finish),
     ]
@@ -455,7 +535,7 @@ def build_tree(app):
         Condition("TargetConfirmed?", n.cond_target_confirmed),
         Action("ProtectTarget", n.protect_target),
         Action("PlanToStandoff", n.plan_to_standoff),
-        Action("FollowPath", n.follow_path),
+        Action("FollowPath", n.follow_path, n.follow_reset),
         Action("VisualApproach", n.visual_approach, n.visual_reset),
         Action("MarkRescued", n.mark_rescued),
     ])
@@ -464,17 +544,25 @@ def build_tree(app):
         Condition("TargetsLeft?", n.cond_targets_left),
         Action("SelectFrontier", n.select_frontier),
         Action("PlanToGoal", n.plan_explore),
-        Action("FollowPath", n.follow_path),
+        Action("FollowPath", n.follow_path, n.follow_reset),
+    ])
+
+    sweep = Sequence("Sweep", [
+        Condition("Sweep?", n.cond_sweep),
+        Action("SelectSweepGoal", n.select_sweep_goal),
+        Action("PlanToGoal", n.plan_sweep),
+        Action("FollowPath", n.follow_path, n.follow_reset),
+        Action("Rotate360", n.rotate_360, n.rotate_reset),
     ])
 
     return_home = Sequence("ReturnHome", [Condition("ReturnHome?", n.cond_return_home)] + [
         Action("PlanHome", n.plan_home),
-        Action("FollowPath", n.follow_path),
+        Action("FollowPath", n.follow_path, n.follow_reset),
         Action("AlignToStartYaw", n.align_home),
         Action("Finish", n.finish),
     ])
 
-    mission = ReactiveSelector("Mission", [forced_return, approach, explore, return_home,
+    mission = ReactiveSelector("Mission", [forced_return, approach, explore, sweep, return_home,
                                            Action("Idle", n.idle)])
     root = ReactiveSequence("Root", [safety, mission])
     return BehaviorTree(root), n

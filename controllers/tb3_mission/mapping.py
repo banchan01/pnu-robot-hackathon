@@ -19,7 +19,7 @@ import time
 import cv2
 import numpy as np
 
-from config import LIDAR_ANGLES, LIDAR_MIN, LIDAR_MAX, LIDAR_OFFSET_X
+from config import LIDAR_ANGLES, LIDAR_MIN, LIDAR_MAX, LIDAR_OFFSET_X, CAM_FOV, CAM_OFFSET_X
 
 LETHAL = 254
 INSCRIBED = 253
@@ -35,6 +35,7 @@ class OccupancyGrid:
         self.rows = int(round(h_m / self.res))
         self.logodds = np.zeros((self.rows, self.cols), dtype=np.float32)
         self.observed = np.zeros((self.rows, self.cols), dtype=bool)
+        self.viewed = np.zeros((self.rows, self.cols), dtype=bool)      # 카메라 시야가 한 번이라도 훑은 셀
 
         self.l_occ = float(cfg["l_occ"])
         self.l_free = float(cfg["l_free"])
@@ -254,6 +255,62 @@ class OccupancyGrid:
 
     def explored_ratio(self):
         return float(self.observed.mean())
+
+    # ---------- 카메라 시야 지도 (Sweep 단계용) ----------
+    def mark_viewed(self, pose, costmap, max_range=3.0):
+        """카메라 시야 원뿔(±FOV/2, max_range) 안에서 장애물에 가려지지 않은 셀을 viewed로 표시한다."""
+        x, y, yaw = pose
+        cx = x + CAM_OFFSET_X * math.cos(yaw)
+        cy = y + CAM_OFFSET_X * math.sin(yaw)
+        angs = yaw + np.linspace(-CAM_FOV / 2.0, CAM_FOV / 2.0, 61)
+        ts = np.arange(0.1, max_range, self.res)
+        px = cx + ts[None, :] * np.cos(angs)[:, None]
+        py = cy + ts[None, :] * np.sin(angs)[:, None]
+        cols = np.clip(((px - self.x0) / self.res).astype(np.int32), 0, self.cols - 1)
+        rows = np.clip(((py - self.y0) / self.res).astype(np.int32), 0, self.rows - 1)
+        blocked = (costmap[rows, cols] == LETHAL)
+        before_hit = np.cumsum(blocked, axis=1) == 0        # 첫 장애물 이전 구간만
+        self.viewed[rows[before_hit], cols[before_hit]] = True
+
+    def viewed_ratio(self):
+        free = self.observed & ~(self.logodds > self.occ_threshold)
+        n = free.sum()
+        return float((free & self.viewed).sum() / n) if n else 0.0
+
+    def sweep_targets(self, costmap, pose, blacklist=(), now=0.0, min_cells=25):
+        """카메라가 아직 보지 못한 자유 공간 덩어리 [(x, y, size, dist_m)] (점수순)."""
+        cand = (costmap < self.frontier_max_cost) & self.observed & ~self.viewed
+        n, labels, stats, centroids = cv2.connectedComponentsWithStats(cand.astype(np.uint8), connectivity=8)
+        if n <= 1:
+            return []
+        r0, c0 = self.world_to_grid(pose[0], pose[1])
+        dist = self.wavefront_distance(costmap, (r0, c0))
+        out = []
+        for k in range(1, n):
+            size = int(stats[k, cv2.CC_STAT_AREA])
+            if size < min_cells:
+                continue
+            ys, xs = np.where(labels == k)
+            reach = dist[ys, xs]
+            ok = np.where(reach >= 0)[0]
+            if ok.size == 0:
+                continue
+            # 덩어리 안에서 로봇과 가장 가까운 도달 가능 셀을 대표점으로 (탐욕적 커버리지)
+            j = int(ok[np.argmin(reach[ok])])
+            rr, cc = int(ys[j]), int(xs[j])
+            d_m = dist[rr, cc] * self.res
+            if d_m < 0.3:
+                # 바로 옆이면 제자리 회전만으로 충분: 대표점을 조금 안쪽 셀로
+                far = ok[np.argsort(reach[ok])]
+                j = int(far[min(len(far) - 1, 12)])
+                rr, cc = int(ys[j]), int(xs[j])
+                d_m = dist[rr, cc] * self.res
+            wx, wy = self.grid_to_world(rr, cc)
+            if any(bexp > now and (wx - bx) ** 2 + (wy - by) ** 2 < br * br for (bx, by, br, bexp) in blacklist):
+                continue
+            out.append((wx, wy, size, d_m))
+        out.sort(key=lambda e: e[3])
+        return out
 
     # ---------- Scan-to-Map Matching ----------
     def _solid_dist(self):

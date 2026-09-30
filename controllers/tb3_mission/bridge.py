@@ -42,8 +42,8 @@ def _atomic_write_text(path, text):
     os.replace(tmp, path)
 
 
-def _atomic_write_image(path, img, ext):
-    ok, buf = cv2.imencode(ext, img)
+def _atomic_write_image(path, img, ext, params=None):
+    ok, buf = cv2.imencode(ext, img, params or [])
     if not ok:
         return
     tmp = path + ".tmp"
@@ -53,10 +53,14 @@ def _atomic_write_image(path, img, ext):
 
 
 class StatusBridge:
-    def __init__(self, app, status_every=4, image_every=16, history_every_s=5.0):
+    def __init__(self, app, status_every=None, image_every=None, history_every_s=5.0):
+        """주기는 tick 단위. basicTimeStep 64 ms 기준 카메라 2 tick(약 8 fps), 지도 8 tick(약 2 fps), 상태 4 tick."""
         self.app = app
-        self.status_every = int(status_every)
-        self.image_every = int(image_every)
+        cfg = app.cfg
+        self.status_every = int(status_every or cfg.get("web_status_every", 4))
+        self.cam_every = int(cfg.get("web_cam_every", 2))
+        self.image_every = int(image_every or cfg.get("web_map_every", 8))
+        self.jpeg_quality = int(cfg.get("web_jpeg_quality", 75))
         self.history_every_s = float(history_every_s)
         self.history = []            # [(t, explored_ratio, rescued_count, travel_m)]
         self.objects = []            # 탐지 객체 등록부 [{id, color, x, y, n, first_t, last_t, status}]
@@ -124,9 +128,14 @@ class StatusBridge:
                 self.history.pop(0)
 
         self._update_objects(t)
+        # 잡음성 단발 검출은 숨기고, 여러 번 관측되었거나 확정·구조된 객체만 내보낸다
+        min_n = int(cfg.get("web_object_min_obs", 6))
         objects = [{"id": o["id"], "color": o["color"], "x": _f(o["x"]), "y": _f(o["y"]), "n": o["n"],
                     "first_t": _f(o["first_t"], 1), "last_t": _f(o["last_t"], 1), "status": o["status"]}
-                   for o in self.objects]
+                   for o in self.objects
+                   if o["status"] in ("confirmed", "rescued") or o["n"] >= min_n]
+        objects.sort(key=lambda o: ({"rescued": 0, "confirmed": 1}.get(o["status"], 2), -o["n"]))
+        objects = objects[:40]
         g = app.grid
         map_meta = {"x0": _f(g.x0), "y0": _f(g.y0), "res": _f(g.res, 4), "rows": g.rows, "cols": g.cols,
                     "scale": app.reporter.scale}
@@ -185,12 +194,16 @@ class StatusBridge:
             except Exception as e:      # 웹 연결 계층의 오류가 미션을 멈추면 안 된다
                 print(f"[bridge] status 저장 실패: {e}", flush=True)
                 os.makedirs(OUTPUT_DIR, exist_ok=True)
+        if self._tick % self.cam_every == 0:
+            try:
+                cam = self.app.detector.overlay()
+                if cam is not None:
+                    _atomic_write_image(self.cam_path, cam, ".jpg", [cv2.IMWRITE_JPEG_QUALITY, self.jpeg_quality])
+            except Exception as e:
+                print(f"[bridge] 카메라 저장 실패: {e}", flush=True)
         if self._tick % self.image_every == 0:
             try:
                 img = self.app.reporter.render(self.app.costmap, self.app.bb, self.app.detector)
-                _atomic_write_image(self.map_path, img, ".png")
-                cam = self.app.detector.overlay()
-                if cam is not None:
-                    _atomic_write_image(self.cam_path, cam, ".jpg")
+                _atomic_write_image(self.map_path, img, ".png", [cv2.IMWRITE_PNG_COMPRESSION, 1])
             except Exception as e:
-                print(f"[bridge] 이미지 저장 실패: {e}", flush=True)
+                print(f"[bridge] 지도 저장 실패: {e}", flush=True)

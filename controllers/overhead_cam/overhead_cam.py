@@ -13,7 +13,7 @@ import numpy as np
 from controller import Supervisor
 
 HEIGHT = 2.2                 # 로봇 위 카메라 높이 [m] (천장 2.4 m 아래)
-SAVE_EVERY = 3               # step 몇 번마다 저장할지
+SAVE_EVERY = 2               # step 몇 번마다 저장할지 (64 ms 기준 약 8 fps)
 CTRL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tb3_mission")
 LIVE_POINTER = os.path.join(CTRL_DIR, "live_output_dir.txt")
 
@@ -77,7 +77,7 @@ while sup.step(ts) != -1:
         cv2.line(bgr, (cx, cy), (cx, cy - 26), (0, 140, 255), 2)
         try:
             os.makedirs(os.path.dirname(OUT), exist_ok=True)
-            ok, buf = cv2.imencode(".jpg", bgr, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            ok, buf = cv2.imencode(".jpg", bgr, [cv2.IMWRITE_JPEG_QUALITY, 75])
             if ok:
                 tmp = OUT + ".tmp"
                 with open(tmp, "wb") as f:

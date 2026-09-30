@@ -74,6 +74,7 @@ class App:
         self.bb.set("command_state", "run")
         self.bb.set("replan", False)
         self.bb.set("frontier_exhausted", False)
+        self.bb.set("sweep_exhausted", False)
         self.bb.set("done", False)
         self.blacklist = []                 # (x, y, radius, expire_t)
         self.stats = {"replans": 0, "stuck_events": 0, "block_events": 0, "min_front_m": 99.0, "scan_corrections": 0}
@@ -160,6 +161,7 @@ class App:
                 self.costmap = self.grid.costmap()
 
             if self._tick % int(self.cfg.get("camera_period_mult", 2)) == 0:
+                self.grid.mark_viewed(pose, self.costmap)
                 self.detector.detect(pose, t)
                 det = self.detector.confirm()
                 if det is not None:
@@ -212,9 +214,11 @@ class App:
                 extra = ""
                 if gt is not None:
                     extra = (f" | GT오차 {math.hypot(gt[0]-pose[0], gt[1]-pose[1]):.3f} m / {math.degrees(abs(wrap_angle(gt[2]-pose[2]))):.1f} deg"
-                             f" GT=({gt[0]:.2f},{gt[1]:.2f}) cmd_v={self.motion.cmd_v:.2f} static={self.scan_monitor.static_for(t):.1f}s")
+                             f" GT=({gt[0]:.2f},{gt[1]:.2f}) cmd_v={self.motion.cmd_v:.2f} cmd_w={self.motion.cmd_w:+.2f} "
+                             f"scale={self.motion.speed_scale:.1f} static={self.scan_monitor.static_for(t):.1f}s"
+                             f" run={[l.strip() for l in describe(self.tree.root) if '[R]' in l and 'Action' in l]}")
                 self.log(f"{self.bb.get('state_label')} | pose=({pose[0]:.2f},{pose[1]:.2f},{math.degrees(pose[2]):.0f}deg) "
-                         f"탐색률={self.grid.explored_ratio()*100:.1f}% 남은목표={self.bb.get('targets_left')} "
+                         f"탐색률={self.grid.explored_ratio()*100:.1f}% 시야={self.grid.viewed_ratio()*100:.0f}% 남은목표={self.bb.get('targets_left')} "
                          f"헛돔={self.localizer.frozen_dist:.2f}m 보정={self.localizer.correction_dist:.2f}m{extra}")
 
             save_every = float(cfg.get("save_every_s", 0.0))
