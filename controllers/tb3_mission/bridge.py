@@ -144,7 +144,12 @@ class StatusBridge:
             mv, mw = app.commands.manual_cmd()
             manual = {"v": _f(mv), "w": _f(mw)}
 
-        events = [{"t": _f(et, 1), "msg": m} for (et, m) in app.reporter.events[-80:]]
+        # 주기 상태 로그("| pose=" 포함)는 최근 20줄만, 그 외 사건 로그는 최근 80줄을 시간순으로 합친다
+        ev_all = app.reporter.events
+        periodic = [e for e in ev_all[-400:] if "| pose=" in e[1]][-20:]
+        incidents = [e for e in ev_all if "| pose=" not in e[1]][-80:]
+        merged = sorted(periodic + incidents, key=lambda e: e[0])
+        events = [{"t": _f(et, 1), "msg": m} for (et, m) in merged]
         forbidden = [{"t": _f(ft, 1), "color": c, "x": _f(x), "y": _f(y)}
                      for (ft, c, x, y) in app.detector.forbidden_seen[-10:]]
         detections = [{"color": d["color"], "x": _f(d["world"][0]), "y": _f(d["world"][1]),
