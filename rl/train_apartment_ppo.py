@@ -27,7 +27,15 @@ def make_env_fn():
     return _init
 
 
+import argparse
+
 def main():
+    parser = argparse.ArgumentParser(description="Train AMR PPO in Apartment Environment")
+    parser.add_argument("--steps", type=int, default=1_000_000, help="Total timesteps to train (default: 1,000,000)")
+    parser.add_argument("--envs", type=int, default=6, help="Number of parallel environments (default: 6)")
+    parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate (default: 3e-4)")
+    args = parser.parse_args()
+
     print("=" * 70)
     print("  AMR PPO Training from Scratch: Webots Apartment Environment")
     print("  - 50 Apartment Walls & Furniture Obstacles")
@@ -35,7 +43,7 @@ def main():
     print("  - LDS-01 36-ray LiDAR & Waypoint Tracking")
     print("=" * 70)
 
-    num_envs = 6
+    num_envs = args.envs
     vec_env = make_vec_env(ApartmentGymEnv, n_envs=num_envs, vec_env_cls=DummyVecEnv)
 
     eval_env = DummyVecEnv([make_env_fn()])
@@ -55,7 +63,7 @@ def main():
         activation_fn=torch.nn.Tanh,
     )
 
-    total_timesteps = 1_000_000
+    total_timesteps = args.steps
 
     model = PPO(
         "MlpPolicy",
