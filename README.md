@@ -43,3 +43,16 @@ docs/architecture.md                           # 확장할 전체 파이프라�
 6. Dynamic obstacle avoidance/local planner
 7. Return-to-start mission state machine
 
+
+## 웹 지휘 콘솔과 tb3_mission 컨트롤러
+
+`web/`에는 소방 구조 로봇 컨셉의 지휘 콘솔이 있습니다. 로봇 시점과 상공 시점 영상, 실시간 점유 격자 지도와 탐지 표식 마커,
+출동 모드 전환, 자동/수동 조종 전환을 브라우저에서 할 수 있습니다. 콘솔이 붙는 컨트롤러는 `controllers/tb3_mission`
+(Bayesian Occupancy Grid, Costmap, frontier 탐색, A*, Look-ahead 제어, Behavior Tree)이고, 상공 시점은 `controllers/overhead_cam`이 제공합니다.
+
+```bash
+# Webots에서 worlds/apartment_mission.wbt 를 열고 재생한 뒤
+python web/server.py          # http://127.0.0.1:8000/
+```
+
+자세한 화면 구성과 시나리오는 [web/README.md](web/README.md)를 참고하세요.

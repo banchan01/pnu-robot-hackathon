@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>소방 구조 로봇 지휘 콘솔</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-0: #f4f4f2; --surface-1: #fcfcfb; --surface-2: #ecebe7;
+    --line: #d9d8d2;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #8a8983;
+    --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-7: #4a3aa7;
+    --good: #008300; --warning: #c98500; --serious: #d95926; --critical: #d12d2c;
+    --primary: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-0: #111110; --surface-1: #1a1a19; --surface-2: #242423;
+      --line: #33332f;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #8c8b83;
+      --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-7: #9085e9;
+      --good: #34a834; --warning: #e0a63a; --serious: #e8794c; --critical: #ef6a69;
+      --primary: #3987e5;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px/1.45 -apple-system, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+         background: var(--surface-0); color: var(--text-primary); }
+  header { display: flex; align-items: center; gap: 14px; padding: 8px 16px; background: var(--surface-1);
+           border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 16px; margin: 0; font-weight: 700; }
+  header .sub { color: var(--text-secondary); font-size: 11px; }
+  .spacer { flex: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px;
+          font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--text-secondary); }
+  .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+  .pill.on .dot { background: var(--good); }
+  .pill.off .dot { background: var(--critical); }
+  .pill.manual { background: var(--serious); color: #fff; }
+  .pill.auto { background: var(--good); color: #fff; }
+  main { display: grid; grid-template-columns: 350px minmax(420px, 1fr) 330px; gap: 12px; padding: 12px 16px; align-items: start; }
+  @media (max-width: 1180px) { main { grid-template-columns: 1fr 1fr; } .col.center { grid-column: 1 / -1; grid-row: 1; } }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } .col.center { grid-column: auto; grid-row: auto; } }
+  .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .card { background: var(--surface-1); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .card h2 { font-size: 12px; margin: 0 0 8px; color: var(--text-secondary); font-weight: 600; letter-spacing: .02em; display: flex; align-items: center; gap: 8px; }
+  .card h2 .spacer { flex: 1; }
+  .small { font-size: 11px; color: var(--text-secondary); }
+  .muted { color: var(--text-muted); }
+
+  /* ----- 중앙 뷰 ----- */
+  .viewtabs { display: flex; gap: 4px; background: var(--surface-2); padding: 3px; border-radius: 8px; }
+  .viewtabs button { flex: 1; border: 0; background: transparent; color: var(--text-secondary); padding: 6px 10px; border-radius: 6px;
+                     font: inherit; font-weight: 600; cursor: pointer; }
+  .viewtabs button.active { background: var(--surface-1); color: var(--text-primary); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .viewtabs button:disabled { opacity: .45; cursor: not-allowed; }
+  .stage { position: relative; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; margin-top: 8px; }
+  .stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: none; }
+  .stage img.ready { display: block; }
+  .stage .empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 13px; }
+  .stage .hud { position: absolute; left: 10px; top: 8px; background: rgba(0,0,0,.55); color: #fff; padding: 4px 8px; border-radius: 6px;
+                font: 12px ui-monospace, Menlo, monospace; }
+  .stage .hud.right { left: auto; right: 10px; }
+  .stage.mapmode { background: var(--surface-2); }
+  .stage.mapmode img { object-fit: contain; }
+
+  /* ----- 지도 + 마커 ----- */
+  .mapbox { position: relative; background: var(--surface-2); border-radius: 6px; overflow: hidden; line-height: 0; cursor: crosshair; }
+  .mapbox img { width: 100%; height: auto; display: none; }
+  .mapbox img.ready { display: block; }
+  .mapbox .empty { padding: 70px 0; text-align: center; color: var(--text-muted); line-height: 1.4; }
+  .marker { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0,0,0,.4); cursor: pointer; transition: transform .1s; }
+  .marker:hover, .marker.sel { transform: scale(1.35); z-index: 3; }
+  .marker.red { background: #e34948; } .marker.orange { background: #eb6834; } .marker.green { background: #1baf7a; } .marker.purple { background: #7c5cff; }
+  .marker.rescued::after { content: "✓"; position: absolute; inset: 0; color: #fff; font-size: 11px; font-weight: 800; line-height: 12px; text-align: center; }
+  .marker.confirmed { animation: pulse 1.2s infinite; }
+  .marker.forbidden { border-style: dashed; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 1px rgba(0,0,0,.4); } 50% { box-shadow: 0 0 0 6px rgba(227,73,72,.35); } 100% { box-shadow: 0 0 0 1px rgba(0,0,0,.4); } }
+  .popup { position: absolute; z-index: 4; background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--line); border-radius: 8px;
+           padding: 6px 10px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 14px rgba(0,0,0,.2); pointer-events: none; white-space: nowrap; }
+  .popup b { font-weight: 700; }
+  .objlist { margin: 6px 0 0; padding: 0; list-style: none; max-height: 150px; overflow: auto; }
+  .objlist li { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 6px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .objlist li:hover, .objlist li.sel { background: var(--surface-2); }
+  .objlist .sw { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .objlist .st { margin-left: auto; font-size: 11px; color: var(--text-secondary); }
+
+  /* ----- 타일 / 그래프 ----- */
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .tile { background: var(--surface-2); border-radius: 8px; padding: 6px 8px; min-width: 0; }
+  .tile .k { font-size: 10px; color: var(--text-secondary); }
+  .tile .v { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .u { font-size: 10px; color: var(--text-muted); margin-left: 2px; font-weight: 500; }
+  .state { font-size: 13px; font-weight: 700; padding: 6px 8px; border-radius: 8px; background: var(--surface-2); margin-bottom: 6px;
+           display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .state span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lvl { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; color: #fff; flex: none; }
+  .lvl.clear { background: var(--good); } .lvl.slow { background: var(--warning); } .lvl.blocked { background: var(--critical); } .lvl.none { background: var(--text-muted); }
+  .progress { position: relative; height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin: 6px 0 2px; }
+  .progress .bar { height: 100%; background: var(--series-1); border-radius: 999px; }
+  .progress .mark { position: absolute; top: 0; width: 2px; height: 100%; background: var(--serious); }
+  .viz { position: relative; }
+  .viz svg { width: 100%; height: 130px; display: block; }
+  .viz .tip { position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--line); border-radius: 6px;
+              padding: 4px 8px; font-size: 11px; display: none; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+
+  /* ----- 조종 ----- */
+  .drivebar { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; background: var(--surface-2); color: var(--text-secondary); padding: 7px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+  .seg button.active.auto { background: var(--good); color: #fff; }
+  .seg button.active.manual { background: var(--serious); color: #fff; }
+  .pad { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); gap: 4px; }
+  .pad button { border: 1px solid var(--line); background: var(--surface-2); color: var(--text-primary); border-radius: 8px; font-size: 18px; cursor: pointer;
+                user-select: none; -webkit-user-select: none; touch-action: none; }
+  .pad button:active, .pad button.down { background: var(--series-1); color: #fff; }
+  .pad button:disabled { opacity: .4; cursor: not-allowed; }
+  .pad .stop { font-size: 14px; font-weight: 700; }
+  .sliders { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--text-secondary); }
+  .sliders input { width: 130px; }
+  .drivehint { font-size: 11px; color: var(--text-secondary); }
+  kbd { font: 11px ui-monospace, Menlo, monospace; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+  /* ----- 모드/명령/BT/로그 ----- */
+  .modes { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .mode { text-align: left; border: 1px solid var(--line); background: var(--surface-2); color: var(--text-primary);
+          border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; }
+  .mode:hover { border-color: var(--text-muted); }
+  .mode .t { font-weight: 700; font-size: 12px; display: flex; gap: 6px; align-items: center; }
+  .mode .d { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .mode.active { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .mode.critical { border-color: var(--critical); } .mode.critical .t { color: var(--critical); }
+  .mode.warning .t { color: var(--serious); }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  button.btn { border: 1px solid var(--line); background: var(--surface-2); color: var(--text-primary); border-radius: 6px;
+               padding: 5px 10px; cursor: pointer; font: inherit; font-weight: 600; }
+  button.btn:hover { border-color: var(--text-muted); }
+  button.btn.danger { color: var(--critical); border-color: var(--critical); }
+  select, input[type=text], input[type=number] { font: inherit; padding: 5px 7px; border-radius: 6px; border: 1px solid var(--line);
+               background: var(--surface-1); color: var(--text-primary); }
+  input[type=text] { flex: 1; min-width: 120px; }
+  pre.bt { margin: 0; font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; overflow: auto; max-height: 230px;
+           background: var(--surface-2); border-radius: 6px; padding: 6px 8px; }
+  pre.bt .S { color: var(--good); } pre.bt .F { color: var(--critical); } pre.bt .R { color: var(--series-1); font-weight: 700; }
+  .log { max-height: 220px; overflow: auto; font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--surface-2);
+         border-radius: 6px; padding: 6px 8px; }
+  .log div { white-space: pre-wrap; word-break: break-all; }
+  .log .t { color: var(--text-muted); margin-right: 6px; }
+  .log .cmd { color: var(--series-2); } .log .hit { color: var(--critical); font-weight: 600; } .log .ok { color: var(--good); font-weight: 600; }
+  .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--surface-1);
+           padding: 8px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 9; }
+  .toast.show { opacity: .95; }
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🚒 소방 구조 로봇 지휘 콘솔</h1><div class="sub">TurtleBot3 · 아파트 화재 현장 · 요구조자 수색 및 구조</div></div>
+  <div class="spacer"></div>
+  <span class="pill auto" id="drivePill">자동 임무</span>
+  <span class="pill" id="modePill">모드: 미지정</span>
+  <span class="pill" id="simTime">t = 0 s</span>
+  <span class="pill off" id="conn"><span class="dot"></span><span>연결 대기</span></span>
+</header>
+
+<main>
+  <!-- ================= 왼쪽: 지도 · 객체 · 상태 · 그래프 ================= -->
+  <div class="col left">
+    <div class="card">
+      <h2>현장 지도 <span class="small muted">탐지 표식을 클릭하면 좌표가 표시됩니다</span></h2>
+      <div class="mapbox" id="mapSmall"><img alt="지도"><div class="empty">컨트롤러가 지도를 보내면<br>표시됩니다</div></div>
+      <ul class="objlist" id="objList"><li class="small muted">탐지된 표식 없음</li></ul>
+    </div>
+    <div class="card">
+      <div class="state"><span id="stateLabel">대기</span><span class="lvl none" id="safety">안전 -</span></div>
+      <div class="tiles">
+        <div class="tile"><div class="k">남은 요구조자</div><div class="v" id="left">-</div></div>
+        <div class="tile"><div class="k">구조 완료</div><div class="v" id="rescuedN">-</div></div>
+        <div class="tile"><div class="k">탐색률</div><div class="v"><span id="explored">-</span><span class="u">%</span></div></div>
+        <div class="tile"><div class="k">이동 거리</div><div class="v"><span id="travel">-</span><span class="u">m</span></div></div>
+        <div class="tile"><div class="k">전방 장애물</div><div class="v"><span id="front">-</span><span class="u">m</span></div></div>
+        <div class="tile"><div class="k">금지 표식</div><div class="v" id="forbidden">-</div></div>
+      </div>
+      <div class="small" id="poseText" style="margin-top:6px">추정 위치 -</div>
+      <div class="progress"><div class="bar" id="timeBar" style="width:0%"></div><div class="mark" id="returnMark" style="left:70%"></div></div>
+      <div class="small" id="timeText">제한 시간 대비 진행. 주황 눈금은 자동 복귀 시점.</div>
+    </div>
+    <div class="card">
+      <h2>탐색률 추이 <span class="small muted">관측 격자 비율 · 빨간 점은 구조 시점</span></h2>
+      <div class="viz"><svg id="chart" viewBox="0 0 600 130" preserveAspectRatio="none"></svg><div class="tip" id="tip"></div></div>
+    </div>
+    <div class="card">
+      <h2>속도 명령 추이 <span class="small muted">최근 60초 · 선속도</span></h2>
+      <div class="viz"><svg id="chartV" viewBox="0 0 600 90" preserveAspectRatio="none"></svg></div>
+    </div>
+  </div>
+
+  <!-- ================= 중앙: 카메라/상공/지도 뷰 + 조종 ================= -->
+  <div class="col center">
+    <div class="card">
+      <div class="viewtabs">
+        <button data-view="robot" class="active">🤖 로봇 시점</button>
+        <button data-view="top" id="tabTop">🛸 상공 시점</button>
+        <button data-view="map">🗺 지도 확대</button>
+      </div>
+      <div class="stage" id="stage">
+        <img id="stageImg" alt="">
+        <div class="empty" id="stageEmpty">영상 대기 중</div>
+        <div class="hud" id="hudL">-</div>
+        <div class="hud right" id="hudR">-</div>
+        <div id="stageMarkers" style="position:absolute;inset:0;display:none"></div>
+      </div>
+      <div class="drivebar">
+        <div class="seg">
+          <button id="btnAuto" class="active auto">자동 임무</button>
+          <button id="btnManual" class="manual">수동 조종</button>
+        </div>
+        <div class="pad" id="pad">
+          <span></span><button data-k="f" disabled>▲</button><span></span>
+          <button data-k="l" disabled>◀</button><button class="stop" data-k="s" disabled>■</button><button data-k="r" disabled>▶</button>
+          <span></span><button data-k="b" disabled>▼</button><span></span>
+        </div>
+        <div class="sliders">
+          <label>선속도 <span id="vVal">0.15</span> m/s<br><input type="range" id="vMax" min="0.04" max="0.22" step="0.01" value="0.15"></label>
+          <label>각속도 <span id="wVal">1.0</span> rad/s<br><input type="range" id="wMax" min="0.3" max="2.0" step="0.1" value="1.0"></label>
+        </div>
+        <div class="drivehint" id="driveHint">수동 조종을 켜면 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 또는 방향키로 조종합니다.<br>전방 장애물 정지와 감속은 수동에서도 유지됩니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Behavior Tree 실행 상태 <span class="small muted">S 성공 · F 실패 · R 실행 중</span></h2>
+      <pre class="bt" id="bt">-</pre>
+    </div>
+  </div>
+
+  <!-- ================= 오른쪽: 출동 모드 · 직접 지휘 · 로그 ================= -->
+  <div class="col right">
+    <div class="card"><h2>출동 모드</h2><div class="modes" id="modes"></div></div>
+    <div class="card">
+      <h2>직접 지휘</h2>
+      <div class="row" style="margin-bottom:6px">
+        <button class="btn" data-cmd="stop">⏸ 정지</button>
+        <button class="btn" data-cmd="resume">▶ 재개</button>
+        <button class="btn danger" data-cmd="return">🏠 즉시 복귀</button>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <select id="tColor"><option value="red">빨강 (요구조자)</option><option value="orange">주황 (위험물)</option><option value="green">초록</option><option value="purple">보라</option></select>
+        <input type="number" id="tCount" value="2" min="1" max="9" style="width:56px" title="인원">
+        <button class="btn" id="tSend">목표 변경</button>
+      </div>
+      <form class="row" id="rawForm"><input type="text" id="raw" placeholder="텍스트 명령 (target red 1 …)"><button class="btn" type="submit">전송</button></form>
+      <div class="small" id="pending" style="margin-top:4px"></div>
+    </div>
+    <div class="card"><h2>구조 기록</h2><ul id="rescuedList" style="margin:0;padding-left:18px"><li class="small muted">아직 없음</li></ul></div>
+    <div class="card"><h2>현장 로그</h2><div class="log" id="log"></div></div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const state = { view: "robot", drive: "auto", sel: null, objects: [], meta: null, vHist: [], lastEventKey: null, modesKey: "" };
+
+  // ---------- 공통 ----------
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 1500); }
+  async function post(url, body) {
+    try { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+          const j = await r.json(); if (!j.ok) toast("실패: " + (j.error || "")); return j; }
+    catch (e) { toast("서버 연결 실패"); return { ok: false }; }
+  }
+  async function sendCmd(cmd) { const j = await post("/api/command", { command: cmd }); if (j.ok) toast("명령 전송: " + cmd); }
+  async function setMode(id) { const j = await post("/api/mode", { mode: id }); if (j.ok) toast("모드 전환: " + j.commands.join(" / ")); }
+  const fmt = (v, d = 2) => (v === null || v === undefined) ? "-" : Number(v).toFixed(d);
+  const COLOR_KO = { red: "빨강 · 요구조자", orange: "주황 · 위험물", green: "초록 · 접근 금지", purple: "보라 · 접근 금지" };
+  const STATUS_KO = { seen: "관측", forbidden: "금지 표식", confirmed: "확정 · 접근 중", rescued: "구조 완료" };
+
+  document.querySelectorAll("button[data-cmd]").forEach(b => b.onclick = () => sendCmd(b.dataset.cmd));
+  $("tSend").onclick = () => sendCmd(`target ${$("tColor").value} ${$("tCount").value}`);
+  $("rawForm").onsubmit = e => { e.preventDefault(); const v = $("raw").value.trim(); if (v) { sendCmd(v); $("raw").value = ""; } };
+
+  // ---------- 중앙 뷰 전환 ----------
+  document.querySelectorAll(".viewtabs button").forEach(b => b.onclick = () => {
+    state.view = b.dataset.view;
+    document.querySelectorAll(".viewtabs button").forEach(x => x.classList.toggle("active", x === b));
+    $("stage").classList.toggle("mapmode", state.view === "map");
+    $("stageImg").classList.remove("ready"); $("stageEmpty").style.display = "";
+    $("stageMarkers").style.display = state.view === "map" ? "block" : "none";
+    refreshImages(true);
+  });
+
+  let imgTick = 0;
+  function loadImg(img, url, onOk) {
+    const n = Date.now();
+    img.onload = () => { img.classList.add("ready"); if (onOk) onOk(); };
+    img.onerror = () => {};
+    img.src = url + "?" + n;
+  }
+  function refreshImages(force) {
+    if (!force && imgTick++ % 2) return;
+    const src = { robot: "/api/camera.jpg", top: "/api/top.jpg", map: "/api/map.png" }[state.view];
+    loadImg($("stageImg"), src, () => { $("stageEmpty").style.display = "none"; });
+    const m = $("mapSmall").querySelector("img");
+    loadImg(m, "/api/map.png", () => { $("mapSmall").querySelector(".empty").style.display = "none"; });
+  }
+
+  // ---------- 지도 마커 ----------
+  function worldToPct(x, y) {
+    const m = state.meta; if (!m) return null;
+    const c = Math.floor((x - m.x0) / m.res), r = Math.floor((y - m.y0) / m.res);
+    return { left: (c + 0.5) / m.cols * 100, top: (m.rows - 1 - r + 0.5) / m.rows * 100 };
+  }
+  function pctToWorld(px, py) {
+    const m = state.meta; if (!m) return null;
+    const c = px / 100 * m.cols, r = m.rows - py / 100 * m.rows;
+    return { x: m.x0 + c * m.res, y: m.y0 + r * m.res };
+  }
+  function popupHtml(o) {
+    return `<b>#${o.id} ${COLOR_KO[o.color] || o.color}</b><br>상태: ${STATUS_KO[o.status] || o.status}<br>좌표: (${fmt(o.x)}, ${fmt(o.y)}) m<br>관측 ${o.n}회 · 최초 ${fmt(o.first_t, 0)} s · 최근 ${fmt(o.last_t, 0)} s`;
+  }
+  function renderMarkers(container, objects, imgEl) {
+    container.querySelectorAll(".marker, .popup").forEach(e => e.remove());
+    if (!state.meta || !imgEl || !imgEl.classList.contains("ready")) return;
+    // 지도 이미지가 stage 안에서 contain 되므로 실제 이미지 영역을 계산한다
+    let box = { l: 0, t: 0, w: 100, h: 100 };
+    if (container.id === "stageMarkers") {
+      const st = $("stage").getBoundingClientRect(), natW = imgEl.naturalWidth, natH = imgEl.naturalHeight;
+      if (natW && natH) { const s = Math.min(st.width / natW, st.height / natH); const w = natW * s, h = natH * s;
+        box = { l: (st.width - w) / 2 / st.width * 100, t: (st.height - h) / 2 / st.height * 100, w: w / st.width * 100, h: h / st.height * 100 }; }
+    }
+    objects.forEach(o => {
+      const p = worldToPct(o.x, o.y); if (!p) return;
+      const d = document.createElement("div");
+      d.className = `marker ${o.color} ${o.status}` + (state.sel === o.id ? " sel" : "");
+      d.style.left = (box.l + p.left / 100 * box.w) + "%"; d.style.top = (box.t + p.top / 100 * box.h) + "%";
+      d.title = `#${o.id} ${o.color} (${fmt(o.x)}, ${fmt(o.y)})`;
+      d.onclick = ev => { ev.stopPropagation(); state.sel = (state.sel === o.id) ? null : o.id; renderAllMarkers(); };
+      container.appendChild(d);
+      if (state.sel === o.id) {
+        const pop = document.createElement("div"); pop.className = "popup"; pop.innerHTML = popupHtml(o);
+        pop.style.left = `calc(${d.style.left} + 12px)`; pop.style.top = `calc(${d.style.top} + 10px)`;
+        container.appendChild(pop);
+      }
+    });
+  }
+  function renderAllMarkers() {
+    renderMarkers($("mapSmall"), state.objects, $("mapSmall").querySelector("img"));
+    if (state.view === "map") renderMarkers($("stageMarkers"), state.objects, $("stageImg"));
+    const ul = $("objList");
+    ul.innerHTML = state.objects.length ? state.objects.map(o =>
+      `<li data-id="${o.id}" class="${state.sel === o.id ? "sel" : ""}"><span class="sw marker ${o.color}" style="position:static;margin:0;width:10px;height:10px;border-width:1px"></span>
+       <span>#${o.id} ${COLOR_KO[o.color] || o.color}</span><span class="small">(${fmt(o.x)}, ${fmt(o.y)})</span><span class="st">${STATUS_KO[o.status] || o.status}</span></li>`).join("")
+      : '<li class="small muted">탐지된 표식 없음</li>';
+    ul.querySelectorAll("li[data-id]").forEach(li => li.onclick = () => { const id = +li.dataset.id; state.sel = state.sel === id ? null : id; renderAllMarkers(); });
+  }
+  // 지도 빈 곳 클릭: 해당 지점의 월드 좌표를 잠시 표시
+  $("mapSmall").addEventListener("click", ev => {
+    const box = $("mapSmall"); const r = box.getBoundingClientRect();
+    const w = pctToWorld((ev.clientX - r.left) / r.width * 100, (ev.clientY - r.top) / r.height * 100);
+    state.sel = null; renderAllMarkers();
+    if (w) { const pop = document.createElement("div"); pop.className = "popup"; pop.innerHTML = `지점 좌표: (${fmt(w.x)}, ${fmt(w.y)}) m`;
+      pop.style.left = (ev.clientX - r.left + 10) + "px"; pop.style.top = (ev.clientY - r.top + 10) + "px"; box.appendChild(pop); setTimeout(() => pop.remove(), 2500); }
+  });
+
+  // ---------- 수동 조종 ----------
+  const keys = new Set();
+  let manualTimer = null;
+  function speeds() { return { v: parseFloat($("vMax").value), w: parseFloat($("wMax").value) }; }
+  $("vMax").oninput = () => $("vVal").textContent = fmt($("vMax").value, 2);
+  $("wMax").oninput = () => $("wVal").textContent = fmt($("wMax").value, 1);
+  function computeCmd() {
+    const s = speeds(); let v = 0, w = 0;
+    if (keys.has("f")) v += s.v; if (keys.has("b")) v -= s.v;
+    if (keys.has("l")) w += s.w; if (keys.has("r")) w -= s.w;
+    return { v, w };
+  }
+  function pushManual() { if (state.drive !== "manual") return; const c = computeCmd(); post("/api/manual", c); updatePadUI(); }
+  function updatePadUI() {
+    document.querySelectorAll("#pad button").forEach(b => { b.disabled = state.drive !== "manual"; b.classList.toggle("down", keys.has(b.dataset.k)); });
+  }
+  async function setDrive(mode) {
+    const j = await post("/api/drive_mode", { mode }); if (!j.ok) return;
+    state.drive = mode; keys.clear();
+    $("btnAuto").classList.toggle("active", mode === "auto"); $("btnManual").classList.toggle("active", mode === "manual");
+    const pill = $("drivePill"); pill.className = "pill " + mode; pill.textContent = mode === "manual" ? "수동 조종" : "자동 임무";
+    clearInterval(manualTimer); manualTimer = null;
+    if (mode === "manual") { manualTimer = setInterval(pushManual, 100); toast("수동 조종 모드. 키보드 또는 방향 패드로 조종하세요."); }
+    else toast("자동 임무 모드로 복귀");
+    updatePadUI();
+  }
+  $("btnAuto").onclick = () => setDrive("auto");
+  $("btnManual").onclick = () => setDrive("manual");
+  const KEYMAP = { w: "f", arrowup: "f", s: "b", arrowdown: "b", a: "l", arrowleft: "l", d: "r", arrowright: "r", " ": "s" };
+  function isTyping(e) { const t = e.target.tagName; return t === "INPUT" || t === "TEXTAREA" || t === "SELECT"; }
+  document.addEventListener("keydown", e => {
+    if (isTyping(e) || state.drive !== "manual") return;
+    const k = KEYMAP[e.key.toLowerCase()]; if (!k) return; e.preventDefault();
+    if (k === "s") keys.clear(); else keys.add(k); pushManual();
+  });
+  document.addEventListener("keyup", e => {
+    if (state.drive !== "manual") return; const k = KEYMAP[e.key.toLowerCase()]; if (!k) return; keys.delete(k); pushManual();
+  });
+  window.addEventListener("blur", () => { keys.clear(); pushManual(); });
+  document.querySelectorAll("#pad button").forEach(b => {
+    const k = b.dataset.k;
+    const down = e => { e.preventDefault(); if (k === "s") keys.clear(); else keys.add(k); pushManual(); };
+    const up = e => { e.preventDefault(); keys.delete(k); pushManual(); };
+    b.addEventListener("pointerdown", down); b.addEventListener("pointerup", up); b.addEventListener("pointerleave", up); b.addEventListener("pointercancel", up);
+  });
+
+  // ---------- 그래프 ----------
+  function renderChart(hist, limit) {
+    const svg = $("chart"); const W = 600, H = 130, L = 34, R = 22, T = 8, B = 20;
+    if (!hist || hist.length < 2) { svg.innerHTML = `<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--text-muted)" font-size="12">데이터 수집 중</text>`; return; }
+    const tmax = Math.max(limit || 0, hist[hist.length - 1][0]);
+    const x = t => L + (t / tmax) * (W - L - R), y = v => T + (1 - v) * (H - T - B);
+    let g = "";
+    [0, .5, 1].forEach(v => { g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/>`;
+      g += `<text x="${L-4}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--text-secondary)">${Math.round(v*100)}%</text>`; });
+    [0, .5, 1].forEach(f => { const t = f * tmax; g += `<text x="${x(t)}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--text-secondary)">${Math.round(t)}s</text>`; });
+    g += `<polyline points="${hist.map(h => `${x(h[0]).toFixed(1)},${y(h[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    hist.forEach((h, i) => { if (i > 0 && h[2] > hist[i-1][2]) g += `<circle cx="${x(h[0])}" cy="${y(h[1])}" r="5" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"/>`; });
+    g += `<line id="cross" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--text-muted)" style="display:none"/>`;
+    svg.innerHTML = g;
+    svg.onmousemove = e => {
+      const rect = svg.getBoundingClientRect(); const t = ((e.clientX - rect.left) / rect.width * W - L) / (W - L - R) * tmax;
+      let best = hist[0]; for (const h of hist) if (Math.abs(h[0] - t) < Math.abs(best[0] - t)) best = h;
+      const c = svg.querySelector("#cross"); c.style.display = ""; c.setAttribute("x1", x(best[0])); c.setAttribute("x2", x(best[0]));
+      const tip = $("tip"); tip.style.display = "block"; tip.textContent = `t=${best[0]}s · 탐색 ${(best[1]*100).toFixed(1)}% · 구조 ${best[2]} · 이동 ${best[3]}m`;
+      tip.style.left = Math.min(e.clientX - rect.left + 12, rect.width - 200) + "px"; tip.style.top = (e.clientY - rect.top - 28) + "px";
+    };
+    svg.onmouseleave = () => { $("tip").style.display = "none"; const c = svg.querySelector("#cross"); if (c) c.style.display = "none"; };
+  }
+  function renderVChart() {
+    const svg = $("chartV"); const W = 600, H = 90, L = 34, R = 10, T = 6, B = 14; const h = state.vHist;
+    if (h.length < 2) { svg.innerHTML = ""; return; }
+    const t0 = h[h.length - 1][0] - 60, vmax = 0.22;
+    const x = t => L + Math.max(0, (t - t0) / 60) * (W - L - R), y = v => T + (1 - (v + vmax) / (2 * vmax)) * (H - T - B);
+    let g = `<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)"/>`;
+    g += `<text x="${L-4}" y="${y(vmax)+4}" text-anchor="end" font-size="10" fill="var(--text-secondary)">+${vmax}</text><text x="${L-4}" y="${y(0)+4}" text-anchor="end" font-size="10" fill="var(--text-secondary)">0</text><text x="${L-4}" y="${y(-vmax)+4}" text-anchor="end" font-size="10" fill="var(--text-secondary)">-${vmax}</text>`;
+    g += `<polyline points="${h.filter(p => p[0] >= t0).map(p => `${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="var(--series-3)" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+    svg.innerHTML = g;
+  }
+
+  // ---------- 모드 ----------
+  function renderModes(modes, current) {
+    const key = JSON.stringify(modes) + "|" + current; if (key === state.modesKey) return; state.modesKey = key;
+    const box = $("modes"); box.innerHTML = "";
+    modes.forEach(m => { const b = document.createElement("button"); b.className = "mode " + (m.tone || "") + (m.id === current ? " active" : "");
+      b.innerHTML = `<div class="t"><span>${m.icon || ""}</span><span>${m.label}</span></div><div class="d">${m.description}</div>`; b.title = m.commands.join(" → "); b.onclick = () => setMode(m.id); box.appendChild(b); });
+    $("modePill").textContent = "모드: " + (current ? ((modes.find(m => m.id === current) || {}).label || current) : "미지정");
+  }
+
+  // ---------- 상태 렌더 ----------
+  function render(s) {
+    const srv = s._server || {};
+    const conn = $("conn"); conn.className = "pill " + (srv.connected ? "on" : "off");
+    conn.lastChild.textContent = srv.connected ? "로봇 연결됨" : (srv.status_age_s == null ? "컨트롤러 대기" : `수신 끊김 (${srv.status_age_s}s)`);
+    renderModes(srv.modes || [], srv.current_mode);
+    $("tabTop").disabled = !srv.top_view; $("tabTop").title = srv.top_view ? "" : "월드에 overhead_cam 노드가 없거나 아직 프레임이 없습니다";
+    $("pending").textContent = (srv.pending_commands && srv.pending_commands.length) ? "전송 대기: " + srv.pending_commands.join(" → ") : "";
+    if (srv.drive_mode && srv.drive_mode !== state.drive && !manualTimer) { state.drive = srv.drive_mode;
+      $("btnAuto").classList.toggle("active", state.drive === "auto"); $("btnManual").classList.toggle("active", state.drive === "manual"); updatePadUI(); }
+    if (s.t == null) return;
+
+    $("simTime").textContent = `t = ${fmt(s.t, 0)} s`;
+    const cs = s.command_state;
+    $("stateLabel").textContent = (s.done ? "✅ 임무 종료 · " : "") + (s.state_label || "-") + (cs && cs !== "run" ? ` [${cs}]` : "");
+    const lvl = (s.safety || {}).level || "none"; const sf = $("safety"); sf.className = "lvl " + lvl;
+    sf.textContent = { clear: "전방 안전", slow: "감속", blocked: "정지 · 장애물" }[lvl] || "안전 -";
+    $("left").textContent = s.targets_left ?? "-"; $("rescuedN").textContent = (s.rescued || []).length;
+    $("explored").textContent = fmt((s.explored_ratio || 0) * 100, 1); $("travel").textContent = fmt(s.travel_m, 1);
+    $("front").textContent = fmt((s.safety || {}).front_min_m); $("forbidden").textContent = s.forbidden_seen_count ?? 0;
+    $("poseText").textContent = s.pose ? `추정 위치 (${fmt(s.pose.x)}, ${fmt(s.pose.y)}) m · 방향 ${fmt(s.pose.yaw_deg, 0)}°` + (s.gt_error_m != null ? ` · 위치 오차 ${fmt(s.gt_error_m)} m` : "") : "";
+    const lim = s.time_limit_s || 1;
+    $("timeBar").style.width = (Math.min(1, s.t / lim) * 100).toFixed(1) + "%"; $("returnMark").style.left = ((s.return_at_ratio || 0.7) * 100) + "%";
+    $("timeText").textContent = `경과 ${fmt(s.t, 0)} s / 제한 ${fmt(lim, 0)} s · 자동 복귀 ${fmt(lim * (s.return_at_ratio || 0.7), 0)} s`;
+
+    // HUD
+    const sv = s.safety || {};
+    $("hudL").textContent = `${s.state_label || ""}`;
+    $("hudR").textContent = `v ${fmt(sv.cmd_v)} m/s  w ${fmt(sv.cmd_w)} rad/s  front ${fmt(sv.front_min_m)} m` + (cs === "manual" ? "  [MANUAL]" : "");
+
+    $("bt").innerHTML = (s.bt || []).map(l => l.replace(/\[(S|F|R)\]$/, (m, k) => `<span class="${k}">[${k}]</span>`)).join("\n");
+    $("rescuedList").innerHTML = (s.rescued || []).length ? s.rescued.map((r, i) => `<li>#${i+1} 위치 (${fmt(r.x)}, ${fmt(r.y)}) · t=${fmt(r.t, 0)} s</li>`).join("") : '<li class="small muted">아직 없음</li>';
+
+    const ev = s.events || []; const key = ev.length ? ev[ev.length-1].t + ev[ev.length-1].msg : "";
+    if (key !== state.lastEventKey) { state.lastEventKey = key; const box = $("log"); const atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 8;
+      box.innerHTML = ev.slice(-60).map(e => { const cls = /구출 완료|미션 종료/.test(e.msg) ? "ok" : /끼임|막힘|실패|상실/.test(e.msg) ? "hit" : /\[명령\]/.test(e.msg) ? "cmd" : "";
+        return `<div><span class="t">${fmt(e.t, 1)}s</span><span class="${cls}">${e.msg}</span></div>`; }).join(""); if (atBottom) box.scrollTop = box.scrollHeight; }
+
+    state.meta = s.map_meta || state.meta; state.objects = s.objects || [];
+    renderAllMarkers();
+    if (!state.vHist.length || s.t !== state.vHist[state.vHist.length - 1][0]) { state.vHist.push([s.t, sv.cmd_v || 0]); if (state.vHist.length > 400) state.vHist.shift(); }
+    renderChart(s.history, s.time_limit_s); renderVChart();
+  }
+
+  async function poll() {
+    try { const r = await fetch("/api/status"); render(await r.json()); }
+    catch (e) { $("conn").className = "pill off"; $("conn").lastChild.textContent = "서버 연결 실패"; }
+    refreshImages(false);
+  }
+  // URL 해시로 초기 뷰 선택 (예: #view=top)
+  const hv = (location.hash.match(/view=(robot|top|map)/) || [])[1];
+  if (hv) document.querySelector(`.viewtabs button[data-view="${hv}"]`).click();
+  updatePadUI(); poll(); setInterval(poll, 500);
+})();
+</script>
+</body>
+</html>

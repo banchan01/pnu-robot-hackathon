@@ -6,3 +6,10 @@ venv/
 logs/
 models/
 
+
+# tb3_mission / web console 실행 산출물 (로컬 전용)
+controllers/*/runtime.ini
+controllers/tb3_mission/output/
+controllers/tb3_mission/commands.txt
+controllers/tb3_mission/manual.json
+controllers/tb3_mission/live_output_dir.txt
