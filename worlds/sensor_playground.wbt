@@ -1,0 +1,100 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/robotis/turtlebot/protos/TurtleBot3Burger.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/devices/robotis/protos/RobotisLds01.proto"
+
+WorldInfo {
+  basicTimeStep 32
+}
+Viewpoint {
+  orientation -0.57735 0.57735 0.57735 2.0944
+  position 0 0 8
+  follow "TurtleBot3Burger"
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 6 6
+  wallHeight 0.25
+}
+
+Solid {
+  translation 0.6 0 0.35
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.35 0.65
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.25 2.5 0.7
+      }
+    }
+  ]
+  name "center wall"
+  boundingObject Box {
+    size 0.25 2.5 0.7
+  }
+}
+
+Solid {
+  translation -1.2 1.0 0.25
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.65 0.35 0.2
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.8 0.8 0.5
+      }
+    }
+  ]
+  name "box obstacle"
+  boundingObject Box {
+    size 0.8 0.8 0.5
+  }
+}
+
+Solid {
+  translation 1.9 1.8 0.12
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.1 0.8 0.2
+        roughness 0.7
+        metalness 0
+      }
+      geometry Sphere {
+        radius 0.12
+      }
+    }
+  ]
+  name "green rescue target"
+  boundingObject Sphere {
+    radius 0.12
+  }
+}
+
+TurtleBot3Burger {
+  translation -2 -1.5 0
+  rotation 0 0 1 0
+  controller "amr_controller"
+  extensionSlot [
+    Camera {
+      translation 0.05 0 0.11
+      fieldOfView 1.0472
+      width 320
+      height 240
+    }
+    RobotisLds01 {
+    }
+  ]
+}
