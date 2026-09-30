@@ -10,12 +10,13 @@ import math
 import numpy as np
 
 from config import (WHEEL_RADIUS, WHEEL_SEPARATION, WHEEL_MAX_SPEED,
-                    CAM_FX, APPLE_RADIUS, CAM_W, LIDAR_MIN, wrap_angle)
+                    CAM_FX, APPLE_RADIUS, CAM_W, LIDAR_MIN, LIDAR_ANGLES, wrap_angle)
 
-# LiDAR 인덱스 구간 (180=전방, 90=좌, 270=우)
+# LiDAR 인덱스 구간 (180=전방, 90=좌, 270=우, 0/359=후방)
 FRONT_IDX = np.arange(150, 211)          # 전방 ±30도
 LEFT_IDX = np.arange(100, 150)           # 좌전방 30~80도
 RIGHT_IDX = np.arange(211, 261)          # 우전방 -80~-30도
+BACK_IDX = np.r_[0:25, 335:360]          # 후방 ±25도
 
 
 def _sector_min(ranges, idx):
@@ -101,6 +102,7 @@ class Motion:
         self._idx = 0
         self._hist = []          # (t, x, y)
         self.front_min = float("inf")
+        self.back_min = float("inf")
 
     # ---------- 저수준 ----------
     def set_cmd(self, v, w):
@@ -135,22 +137,36 @@ class Motion:
     # ---------- 안전 ----------
     def apply_safety(self, ranges):
         """'clear' | 'slow' | 'blocked' 를 돌려주고 속도 배율과 측면 보정을 설정한다."""
-        f = _sector_min(ranges, FRONT_IDX)
+        r = np.asarray(ranges, dtype=np.float32)
+        valid = np.isfinite(r) & (r >= LIDAR_MIN) & (r <= 2.5)
+
+        # 직사각형 주행 복도(Corridor) 기준 전방 충돌 판정:
+        # 로봇 폭 0.16m 기준 ±0.115m 이내에 있는 장애물만 직접 전방 장애물로 판정.
+        # 이렇게 해야 문틈, 좁은 복도, 소화기 옆을 지날 때 측면 벽 때문에 전방이 막힌 것으로 오판하지 않는다.
+        xs = r[valid] * np.cos(LIDAR_ANGLES[valid])
+        ys = r[valid] * np.sin(LIDAR_ANGLES[valid])
+        corridor = (xs > 0.02) & (np.abs(ys) < 0.115)
+        f = float(np.min(xs[corridor])) if corridor.any() else float("inf")
+
         l = _sector_min(ranges, LEFT_IDX)
-        r = _sector_min(ranges, RIGHT_IDX)
+        r_side = _sector_min(ranges, RIGHT_IDX)
+        b = _sector_min(ranges, BACK_IDX)
         self.front_min = f
         self.left_min = l
-        self.right_min = r
+        self.right_min = r_side
+        self.back_min = b
+
+        # 좁은 통로 자동 중심 유지 보정 (Smooth Centering Bias)
         self.side_bias = 0.0
-        if l < self.side_dist:
-            self.side_bias -= 0.4      # 좌측이 가까우면 우회전 보정
-        if r < self.side_dist:
-            self.side_bias += 0.4
+        if l < self.side_dist or r_side < self.side_dist:
+            diff = r_side - l
+            self.side_bias = float(np.clip(1.2 * diff, -0.45, 0.45))
+
         if f < self.stop_dist:
             self.speed_scale = 0.0
             return "blocked"
         if f < self.slow_dist:
-            self.speed_scale = 0.5
+            self.speed_scale = max(0.35, f / self.slow_dist)
             return "slow"
         self.speed_scale = 1.0
         return "clear"

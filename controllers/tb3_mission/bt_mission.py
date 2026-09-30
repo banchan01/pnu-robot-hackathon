@@ -101,15 +101,24 @@ class MissionNodes:
             self._escape_dir = m.freer_side()
             self.label("RECOVERY 후진")
         if self._escape_phase == 1:
-            m.back_off(-0.08)
-            if t - self._escape_t0 > 2.0:
+            # 후방에 16cm 이상 여유가 있을 때만 후진 (-0.08 m/s)
+            b = getattr(m, "back_min", float("inf"))
+            if b > 0.16:
+                m.back_off(-0.08)
+            else:
+                m.stop()
+            # 1.2초 후진했거나 후방이 막히면 회전 탈출 단계로 전환
+            if t - self._escape_t0 > 1.2 or b <= 0.16:
                 self._escape_phase = 2
                 self._escape_t0 = t
+                self._escape_dir = m.freer_side()
                 self.label("RECOVERY 회전")
             return Status.RUNNING
         if self._escape_phase == 2:
-            m.set_cmd(0.0, 0.8 * self._escape_dir)
-            if t - self._escape_t0 > 1.2:
+            m.set_cmd(0.0, 1.0 * self._escape_dir)
+            dt = t - self._escape_t0
+            # 최소 0.5초(약 30도) 이상 회전하고 전방 시야가 열렸거나(0.40m 이상), 최대 2.2초(약 125도) 회전하면 탈출 완료
+            if (dt >= 0.5 and m.front_min > 0.40) or dt > 2.2:
                 m.stop()
                 self._escape_phase = 0
                 self.bb.set("replan", True)

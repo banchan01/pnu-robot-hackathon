@@ -10,11 +10,11 @@
   "w_max": 1.5,
   "lookahead_m": 0.35,
 
-  "stop_dist_m": 0.25,
-  "slow_dist_m": 0.40,
+  "stop_dist_m": 0.18,
+  "slow_dist_m": 0.32,
 
-  "inflate_cells": 4,
-  "soft_cells": 8,
+  "inflate_cells": 3,
+  "soft_cells": 6,
 
   "approach_standoff_m": 0.35,
   "approach_stop_m": 0.25,
