@@ -142,9 +142,19 @@
   select, input[type=text], input[type=number] { font: inherit; padding: 5px 7px; border-radius: 6px; border: 1px solid var(--line);
                background: var(--surface-1); color: var(--text-primary); }
   input[type=text] { flex: 1; min-width: 120px; }
-  pre.bt { margin: 0; font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; overflow: auto; max-height: 230px;
-           background: var(--surface-2); border-radius: 6px; padding: 6px 8px; }
-  pre.bt .S { color: var(--good); } pre.bt .F { color: var(--critical); } pre.bt .R { color: var(--series-1); font-weight: 700; }
+  .bttree { background: var(--surface-2); border-radius: 6px; overflow: auto; max-height: 440px; }
+  .bttree svg { display: block; width: 100%; height: auto; }
+  .bttree .edge { stroke: var(--text-muted); stroke-width: 1.2; fill: none; opacity: .7; }
+  .bttree .node rect { fill: var(--surface-1); stroke: var(--line); stroke-width: 1.2; rx: 5; }
+  .bttree .node.S rect { stroke: var(--good); } .bttree .node.F rect { stroke: var(--critical); }
+  .bttree .node.R rect { stroke: var(--series-1); stroke-width: 2.2; fill: color-mix(in srgb, var(--series-1) 18%, var(--surface-1)); }
+  .bttree .node text { font: 10px -apple-system, "Apple SD Gothic Neo", sans-serif; fill: var(--text-primary); }
+  .bttree .node .type { font-size: 8px; fill: var(--text-secondary); }
+  .bttree .node .badge { font-size: 9px; font-weight: 700; }
+  .bttree .node.S .badge { fill: var(--good); } .bttree .node.F .badge { fill: var(--critical); } .bttree .node.R .badge { fill: var(--series-1); }
+  .bttree .node.none .badge { fill: var(--text-muted); }
+  .btlegend { display: flex; gap: 12px; font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+  .btlegend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; border: 2px solid; }
   .log { max-height: 220px; overflow: auto; font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--surface-2);
          border-radius: 6px; padding: 6px 8px; }
   .log div { white-space: pre-wrap; word-break: break-all; }
@@ -230,8 +240,9 @@
       </div>
     </div>
     <div class="card">
-      <h2>Behavior Tree 실행 상태 <span class="small muted">S 성공 · F 실패 · R 실행 중</span></h2>
-      <pre class="bt" id="bt">-</pre>
+      <h2>Behavior Tree 실행 상태 <span class="small muted">매 tick 갱신 · 위에서 아래 순서로 평가</span></h2>
+      <div class="bttree" id="bt"></div>
+      <div class="btlegend"><span><i style="border-color:var(--series-1);background:color-mix(in srgb, var(--series-1) 18%, var(--surface-1))"></i>실행 중</span><span><i style="border-color:var(--good)"></i>성공</span><span><i style="border-color:var(--critical)"></i>실패</span><span><i style="border-color:var(--line)"></i>미평가</span></div>
     </div>
   </div>
 
@@ -447,6 +458,49 @@
     svg.innerHTML = g;
   }
 
+  // ---------- Behavior Tree 그림 ----------
+  const TYPE_KO = { ReactiveSequence: "반응 순차", Sequence: "순차", ReactiveSelector: "반응 선택", Selector: "선택", Parallel: "병렬",
+                    Recovery: "복구", Condition: "조건", Action: "행동", Inverter: "반전" };
+  let lastBTKey = "";
+  function parseBT(lines) {
+    const root = { children: [] }; const stack = [{ depth: -1, node: root }];
+    lines.forEach(l => {
+      const m = l.match(/^(\s*)([A-Za-z]+): (.+?)(?: \[(S|F|R)\])?$/); if (!m) return;
+      const n = { depth: m[1].length / 2, type: m[2], name: m[3], st: m[4] || "none", children: [] };
+      while (stack.length && stack[stack.length - 1].depth >= n.depth) stack.pop();
+      stack[stack.length - 1].node.children.push(n); stack.push({ depth: n.depth, node: n });
+    });
+    return root.children[0];
+  }
+  function renderBT(lines) {
+    const key = lines.join("\n"); if (key === lastBTKey) return; lastBTKey = key;
+    const root = parseBT(lines); const box = $("bt");
+    if (!root) { box.innerHTML = '<div class="small muted" style="padding:10px">트리 정보 없음</div>'; return; }
+    const NW = 118, NH = 22, GX = 30, GY = 3; let row = 0; let maxDepth = 0;
+    (function layout(n, depth) {                      // 잎은 위에서 아래로 차례로, 부모는 자식들의 가운데
+      n.depth = depth; maxDepth = Math.max(maxDepth, depth);
+      if (!n.children.length) { n.y = row++ * (NH + GY); return; }
+      n.children.forEach(c => layout(c, depth + 1));
+      n.y = (n.children[0].y + n.children[n.children.length - 1].y) / 2;
+    })(root, 0);
+    const W = (maxDepth + 1) * (NW + GX) + 8, H = row * (NH + GY) + 4;
+    let edges = "", nodes = "";
+    (function draw(n) {
+      const x = 4 + n.depth * (NW + GX);
+      n.children.forEach(c => {
+        const cx = 4 + c.depth * (NW + GX), mx = x + NW + GX / 2;
+        edges += `<path class="edge" d="M${x + NW},${n.y + NH / 2} C${mx},${n.y + NH / 2} ${mx},${c.y + NH / 2} ${cx},${c.y + NH / 2}"/>`;
+        draw(c);
+      });
+      const label = n.name.replace(/\?$/, "");
+      nodes += `<g class="node ${n.st}" transform="translate(${x},${n.y})"><title>${n.type}: ${n.name}</title><rect width="${NW}" height="${NH}"/>
+        <text x="5" y="8.5" class="type">${TYPE_KO[n.type] || n.type}${n.name.endsWith("?") ? " ?" : ""}</text>
+        <text x="5" y="18.5">${label.length > 20 ? label.slice(0, 19) + "…" : label}</text>
+        <text x="${NW - 5}" y="8.5" text-anchor="end" class="badge">${{ S: "성공", F: "실패", R: "실행" }[n.st] || ""}</text></g>`;
+    })(root);
+    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMinYMin meet" style="min-width:${Math.min(W, 900)}px">${edges}${nodes}</svg>`;
+  }
+
   // ---------- 모드 ----------
   function renderModes(modes, current) {
     const key = JSON.stringify(modes) + "|" + current; if (key === state.modesKey) return; state.modesKey = key;
@@ -488,7 +542,7 @@
     $("hudL").textContent = `${s.state_label || ""}`;
     $("hudR").textContent = `v ${fmt(sv.cmd_v)} m/s  w ${fmt(sv.cmd_w)} rad/s  front ${fmt(sv.front_min_m)} m` + (cs === "manual" ? "  [MANUAL]" : "");
 
-    $("bt").innerHTML = (s.bt || []).map(l => l.replace(/\[(S|F|R)\]$/, (m, k) => `<span class="${k}">[${k}]</span>`)).join("\n");
+    renderBT(s.bt || []);
     $("rescuedList").innerHTML = (s.rescued || []).length ? s.rescued.map((r, i) => `<li>#${i+1} 위치 (${fmt(r.x)}, ${fmt(r.y)}) · t=${fmt(r.t, 0)} s</li>`).join("") : '<li class="small muted">아직 없음</li>';
 
     const ev = s.events || []; const key = ev.length ? ev[ev.length-1].t + ev[ev.length-1].msg : "";

@@ -2,28 +2,15 @@
   "_comment": "소방 구조 로봇의 출동 모드. 각 모드는 컨트롤러가 이해하는 기본 명령(commands.txt 한 줄)의 나열로 정의한다. 새 모드는 이 파일에 항목을 추가하면 서버 재시작 없이 바로 버튼으로 나타난다.",
   "modes": [
     {
-      "id": "search",
-      "label": "요구조자 수색",
-      "icon": "🔍",
-      "tone": "primary",
-      "description": "기본 임무. 빨간 표식(요구조자) 2명을 찾아 접근한 뒤 진입 지점으로 복귀한다.",
-      "commands": ["target red 2", "resume"]
-    },
-    {
       "id": "rapid",
       "label": "신속 구조",
       "icon": "⚡",
       "tone": "primary",
       "description": "연기가 짙어지는 상황. 가장 가까운 요구조자 1명만 확인하고 즉시 복귀한다.",
-      "commands": ["target red 1", "resume"]
-    },
-    {
-      "id": "hazmat",
-      "label": "위험물 확인",
-      "icon": "🧯",
-      "tone": "warning",
-      "description": "주황 표식(가스통 등 위험물) 위치를 확인해 지휘소에 보고한다. 평가 미션에서는 사용 금지.",
-      "commands": ["target orange 1", "resume"]
+      "commands": [
+        "target red 1",
+        "resume"
+      ]
     },
     {
       "id": "hold",
@@ -31,7 +18,9 @@
       "icon": "⏸",
       "tone": "neutral",
       "description": "지휘관 지시가 있을 때까지 제자리에서 정지한다. 지도 갱신은 계속된다.",
-      "commands": ["stop"]
+      "commands": [
+        "stop"
+      ]
     },
     {
       "id": "emergency_evac",
@@ -39,7 +28,9 @@
       "icon": "🚨",
       "tone": "critical",
       "description": "화재 확산 또는 붕괴 위험. 진행 중인 임무를 중단하고 진입 지점으로 즉시 복귀한다.",
-      "commands": ["return"]
+      "commands": [
+        "return"
+      ]
     }
   ]
 }
