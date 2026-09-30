@@ -31,6 +31,7 @@
   header { display: flex; align-items: center; gap: 14px; padding: 8px 16px; background: var(--surface-1);
            border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
   header h1 { font-size: 16px; margin: 0; font-weight: 700; }
+  header .siren { font-size: 22px; line-height: 1; letter-spacing: 2px; }
   header .sub { color: var(--text-secondary); font-size: 11px; }
   .spacer { flex: 1; }
   .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px;
@@ -177,6 +178,7 @@
 </head>
 <body>
 <header>
+  <div class="siren" aria-hidden="true">🚒🚨</div>
   <div class="spacer"></div>
   <span class="pill auto" id="drivePill">자동 임무</span>
   <span class="pill" id="modePill">모드: 미지정</span>
