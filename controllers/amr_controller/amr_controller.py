@@ -205,8 +205,12 @@ x = start_x
 y = start_y
 waypoints = global_planner.plan((x, y), (target_x, target_y))
 waypoint_idx = 1 if len(waypoints) > 1 else 0
+# Sensors return NaN until the first simulation step; step once before the initial read.
+robot.step(timestep)
 previous_left = left_encoder.getValue()
 previous_right = right_encoder.getValue()
+if not (math.isfinite(previous_left) and math.isfinite(previous_right)):
+    previous_left, previous_right = 0.0, 0.0
 
 state = STATE_EXPLORE
 target_found = False
@@ -274,6 +278,9 @@ while robot.step(timestep) != -1:
     # 2. Update Odometry from Wheel Encoders
     current_left = left_encoder.getValue()
     current_right = right_encoder.getValue()
+    if not (math.isfinite(current_left) and math.isfinite(current_right)):
+        # Encoder not ready yet: skip this tick's odometry instead of poisoning x/y with NaN
+        current_left, current_right = previous_left, previous_right
     dl = (current_left - previous_left) * WHEEL_RADIUS_M
     dr = (current_right - previous_right) * WHEEL_RADIUS_M
     distance = (dl + dr) / 2.0
