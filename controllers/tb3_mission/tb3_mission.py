@@ -48,16 +48,22 @@ class App:
         self.right_motor = r.getDevice("right wheel motor")
         self.left_enc = self.left_motor.getPositionSensor()
         self.right_enc = self.right_motor.getPositionSensor()
-        self.left_enc.enable(self.ts)
-        self.right_enc.enable(self.ts)
+        if self.left_enc is not None:
+            self.left_enc.enable(self.ts)
+        if self.right_enc is not None:
+            self.right_enc.enable(self.ts)
         self.compass = r.getDevice("compass")
-        self.compass.enable(self.ts)
+        if self.compass is not None:
+            self.compass.enable(self.ts)
         self.lidar = r.getDevice("LDS-01")
-        self.lidar.enable(self.ts)
+        if self.lidar is not None:
+            self.lidar.enable(self.ts)
         self.camera = r.getDevice("camera")
-        self.camera.enable(self.ts * int(self.cfg.get("camera_period_mult", 2)))
+        if self.camera is not None:
+            self.camera.enable(self.ts * int(self.cfg.get("camera_period_mult", 2)))
         self.keyboard = Keyboard()
-        self.keyboard.enable(self.ts)
+        if self.keyboard is not None:
+            self.keyboard.enable(self.ts)
 
         self.grid = OccupancyGrid(cfg)
         self.reporter = Reporter(self.grid, cfg, cfg.get("show_window", True))

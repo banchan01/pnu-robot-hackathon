@@ -158,14 +158,26 @@ class Motion:
     def moving_cmd(self):
         return abs(self.cmd_v) > 0.02 or abs(self.cmd_w) > 0.2
 
-    def is_stuck(self, t, static_for):
-        """움직이라는 명령이 있는데 LiDAR 스캔이 stuck_window 이상 정지해 있으면 끼임."""
+    def is_stuck(self, t, static_for, pose=None):
+        """움직이라는 명령이 있는데 LiDAR 스캔 또는 (x, y) 위치가 stuck_window 이상 정지해 있으면 끼임."""
         if not self.moving_cmd():
             self._stuck_t0 = None
+            self._hist = []
             return False
-        if static_for <= 0.0:
-            return False
-        return static_for >= self.stuck_window
+        # 1. LiDAR 스캔 기반 끼임 판정
+        if static_for >= self.stuck_window:
+            return True
+        # 2. 위치 변위 기반 끼임/회전 헛돔 판정
+        if pose is not None:
+            self._hist.append((t, pose[0], pose[1]))
+            while len(self._hist) > 1 and t - self._hist[0][0] > self.stuck_window:
+                self._hist.pop(0)
+            if t - self._hist[0][0] >= self.stuck_window * 0.9:
+                t0, x0, y0 = self._hist[0]
+                dist = math.hypot(pose[0] - x0, pose[1] - y0)
+                if dist < self.stuck_move:
+                    return True
+        return False
 
     def clear_stuck(self):
         self._hist = []
