@@ -126,16 +126,7 @@
   .drivehint { font-size: 11px; color: var(--text-secondary); }
   kbd { font: 11px ui-monospace, Menlo, monospace; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
 
-  /* ----- 모드/명령/BT/로그 ----- */
-  .modes { display: grid; grid-template-columns: 1fr; gap: 6px; }
-  .mode { text-align: left; border: 1px solid var(--line); background: var(--surface-2); color: var(--text-primary);
-          border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; }
-  .mode:hover { border-color: var(--text-muted); }
-  .mode .t { font-weight: 700; font-size: 12px; display: flex; gap: 6px; align-items: center; }
-  .mode .d { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-  .mode.active { outline: 2px solid var(--primary); outline-offset: 1px; }
-  .mode.critical { border-color: var(--critical); } .mode.critical .t { color: var(--critical); }
-  .mode.warning .t { color: var(--serious); }
+  /* ----- 명령/BT/로그 ----- */
   .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   button.btn { border: 1px solid var(--line); background: var(--surface-2); color: var(--text-primary); border-radius: 6px;
                padding: 5px 10px; cursor: pointer; font: inherit; font-weight: 600; }
@@ -182,7 +173,6 @@
   <div class="siren">🚨<span class="siren-text">삐뽀삐뽀</span></div>
   <div class="spacer"></div>
   <span class="pill auto" id="drivePill">자동 임무</span>
-  <span class="pill" id="modePill">모드: 미지정</span>
   <span class="pill" id="simTime">t = 0 s</span>
   <span class="pill off" id="conn"><span class="dot"></span><span>연결 대기</span></span>
 </header>
@@ -258,9 +248,8 @@
     </div>
   </div>
 
-  <!-- ================= 오른쪽: 출동 모드 · 직접 지휘 · 로그 ================= -->
+  <!-- ================= 오른쪽: 직접 지휘 · 로그 ================= -->
   <div class="col right">
-    <div class="card"><h2>모드</h2><div class="modes" id="modes"></div></div>
     <div class="card">
       <h2>직접 지휘</h2>
       <div class="row" style="margin-bottom:6px">
@@ -285,7 +274,7 @@
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  const state = { view: "robot", drive: "auto", sel: null, objects: [], meta: null, vHist: [], lastEventKey: null, modesKey: "" };
+  const state = { view: "robot", drive: "auto", sel: null, objects: [], meta: null, vHist: [], lastEventKey: null };
 
   // ---------- 공통 ----------
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 1500); }
@@ -295,7 +284,6 @@
     catch (e) { toast("서버 연결 실패"); return { ok: false }; }
   }
   async function sendCmd(cmd) { const j = await post("/api/command", { command: cmd }); if (j.ok) toast("명령 전송: " + cmd); }
-  async function setMode(id) { const j = await post("/api/mode", { mode: id }); if (j.ok) toast("모드 전환: " + j.commands.join(" / ")); }
   const fmt = (v, d = 2) => (v === null || v === undefined) ? "-" : Number(v).toFixed(d);
   const COLOR_KO = { red: "빨강 · 요구조자", orange: "주황 · 위험물", green: "초록 · 접근 금지", purple: "보라 · 접근 금지" };
   const STATUS_KO = { seen: "관측", forbidden: "금지 표식", confirmed: "확정 · 접근 중", rescued: "구조 완료" };
@@ -537,21 +525,11 @@
     box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMinYMin meet" style="min-width:${Math.min(W, 900)}px">${edges}${nodes}</svg>`;
   }
 
-  // ---------- 모드 ----------
-  function renderModes(modes, current) {
-    const key = JSON.stringify(modes) + "|" + current; if (key === state.modesKey) return; state.modesKey = key;
-    const box = $("modes"); box.innerHTML = "";
-    modes.forEach(m => { const b = document.createElement("button"); b.className = "mode " + (m.tone || "") + (m.id === current ? " active" : "");
-      b.innerHTML = `<div class="t">${m.icon ? `<span>${m.icon}</span>` : ""}<span>${m.label}</span></div><div class="d">${m.description}</div>`; b.title = m.commands.join(" → "); b.onclick = () => setMode(m.id); box.appendChild(b); });
-    $("modePill").textContent = "모드: " + (current ? ((modes.find(m => m.id === current) || {}).label || current) : "미지정");
-  }
-
   // ---------- 상태 렌더 ----------
   function render(s) {
     const srv = s._server || {};
     const conn = $("conn"); conn.className = "pill " + (srv.connected ? "on" : "off");
     conn.lastChild.textContent = srv.connected ? "로봇 연결됨" : (srv.status_age_s == null ? "컨트롤러 대기" : `수신 끊김 (${srv.status_age_s}s)`);
-    renderModes(srv.modes || [], srv.current_mode);
     if (srv.output_dir && lastOutputDir && srv.output_dir !== lastOutputDir) { $("stageImg")._streamUrl = null; $("mapSmall").querySelector("img")._streamUrl = null; refreshImages(false); }
     lastOutputDir = srv.output_dir || lastOutputDir;
     $("tabTop").disabled = !srv.top_view; $("tabTop").title = srv.top_view ? "" : "월드에 overhead_cam 노드가 없거나 아직 프레임이 없습니다";
