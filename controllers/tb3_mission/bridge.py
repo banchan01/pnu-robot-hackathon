@@ -53,7 +53,7 @@ def _atomic_write_image(path, img, ext):
 
 
 class StatusBridge:
-    def __init__(self, app, status_every=4, image_every=16, history_every_s=5.0):
+    def __init__(self, app, status_every=3, image_every=6, history_every_s=5.0):
         self.app = app
         self.status_every = int(status_every)
         self.image_every = int(image_every)

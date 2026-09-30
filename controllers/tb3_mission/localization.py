@@ -35,6 +35,8 @@ class Localizer:
         self.ready = False
 
     def _compass_yaw(self):
+        if self.compass is None:
+            return None
         c = self.compass.getValues()
         if c is None or any(map(math.isnan, c[:2])):
             return None
@@ -45,9 +47,9 @@ class Localizer:
         yc = self._compass_yaw()
         pl = self.left_sensor.getValue()
         pr = self.right_sensor.getValue()
-        if yc is None or math.isnan(pl) or math.isnan(pr):
+        if math.isnan(pl) or math.isnan(pr):
             return False
-        self._yaw_c0 = yc
+        self._yaw_c0 = yc if yc is not None else 0.0
         self._phi_l = pl
         self._phi_r = pr
         self.x = self.y = self.yaw = 0.0

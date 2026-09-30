@@ -299,7 +299,6 @@
     img.src = url + "?" + n;
   }
   function refreshImages(force) {
-    if (!force && imgTick++ % 2) return;
     const src = { robot: "/api/camera.jpg", top: "/api/top.jpg", map: "/api/map.png" }[state.view];
     loadImg($("stageImg"), src, () => { $("stageEmpty").style.display = "none"; });
     const m = $("mapSmall").querySelector("img");

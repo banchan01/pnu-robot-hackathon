@@ -82,8 +82,8 @@ class MissionNodes:
             self._log("전방 막힘 지속 → 회피 기동")
             self.app.motion.clear_stuck()
             return Status.FAILURE
-        if self.app.motion.is_stuck(self.now(), self.bb.get("scan_static_s", 0.0)):
-            self._log(f"끼임 감지(스캔 정지 {self.bb.get('scan_static_s', 0.0):.1f}s) → 복구 행동, 전방 0.24 m 지점을 장애물로 기록")
+        if self.app.motion.is_stuck(self.now(), self.bb.get("scan_static_s", 0.0), self.pose()):
+            self._log(f"끼임/헛돔 감지 → 복구 행동(후진·회피), 전방 0.24 m 가상 장애물 기록")
             self.app.motion.clear_stuck()
             self.app.stats["stuck_events"] += 1
             px, py, yaw = self.pose()
@@ -415,6 +415,8 @@ class MissionNodes:
                 return Status.SUCCESS
         if kind == "frontier":
             self.label(self.bb.get("state_label", "EXPLORE"))
+        elif kind == "home":
+            self.label("RETURN 복귀 주행")
         done = self.app.motion.follow(self.pose(), path)
         return Status.SUCCESS if done else Status.RUNNING
 
