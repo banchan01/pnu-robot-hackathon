@@ -7,12 +7,10 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/devices/robotis/protos/RobotisLds01.proto"
 
 WorldInfo {
-  basicTimeStep 32
 }
 Viewpoint {
-  orientation -0.57735 0.57735 0.57735 2.0944
-  position 0 0 8
-  follow "TurtleBot3Burger"
+  orientation -0.23090429863285805 -0.01018523501343265 0.972923155167246 3.245268365009745
+  position 5.5 0.3 3.2
 }
 TexturedBackground {
 }
@@ -22,7 +20,6 @@ RectangleArena {
   floorSize 6 6
   wallHeight 0.25
 }
-
 Solid {
   translation 0.6 0 0.35
   children [
@@ -42,9 +39,8 @@ Solid {
     size 0.25 2.5 0.7
   }
 }
-
 Solid {
-  translation -1.2 1.0 0.25
+  translation -1.2 1 0.25
   children [
     Shape {
       appearance PBRAppearance {
@@ -62,7 +58,6 @@ Solid {
     size 0.8 0.8 0.5
   }
 }
-
 Solid {
   translation 1.9 1.8 0.12
   children [
@@ -82,10 +77,23 @@ Solid {
     radius 0.12
   }
 }
-
 TurtleBot3Burger {
-  translation -2 -1.5 0
-  rotation 0 0 1 0
+  hidden position_0_0 -1.5996972764817634e-11
+  hidden position_0_1 1.229491787793048e-11
+  hidden position_0_2 1.0372705852394347e-06
+  hidden position2_0_2 0.0002183094468243919
+  hidden position3_0_2 -3.2745602173525966e-07
+  hidden linearVelocity_0 -2.762361603503342e-15 -1.2461392997094017e-15 5.938609979156614e-17
+  hidden angularVelocity_0 1.5831631428830015e-15 1.9818970244714743e-16 8.908232045571071e-17
+  hidden linearVelocity_9 1.1045758809974947e-17 2.2608587983065314e-15 6.245392359633323e-17
+  hidden angularVelocity_9 1.996087914323768e-14 2.758497060871236e-16 6.642013388353801e-17
+  hidden linearVelocity_10 1.886610261757335e-17 -3.3575591129427453e-15 -6.856724113589023e-16
+  hidden angularVelocity_10 2.5101880704004088e-14 5.613330494387006e-16 5.856109337495205e-17
+  hidden rotation_11 0.004751154743684214 0.9999875890489859 -0.001499425422593587 0.00021831215635787299
+  hidden linearVelocity_11 5.573787659566785e-15 -1.1848912213794067e-15 -2.5365751854119846e-15
+  hidden angularVelocity_11 2.9622279541833057e-13 1.3934468681968435e-12 -3.445667948983759e-32
+  translation -1.9999999995045639 -1.500000000520593 -0.0002477392059891878
+  rotation -0.0021116496071761116 -0.9999977704541831 4.7539006656905314e-06 0.004641946780163548
   controller "amr_controller"
   extensionSlot [
     Camera {
