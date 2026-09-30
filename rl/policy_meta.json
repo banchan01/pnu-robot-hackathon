@@ -1,0 +1,7 @@
+{
+  "v_min": 0.10,
+  "v_max": 0.22,
+  "source": "amr_win1_ppo_model.zip",
+  "timesteps": 2699752,
+  "tag": "win1"
+}

@@ -38,8 +38,10 @@ APPLE_REACH_DIST = 0.45     # controller counts a rescue when within 0.45 m of t
 HOME_REACH_DIST = 0.30      # mission complete when back within 0.30 m of the start pad
 WAYPOINT_REACH_DIST = 0.40  # same threshold as amr_controller
 
-# Controller maps action[0] to v in [0.10, 0.22] (always forward). Match it here.
-MIN_LINEAR_SPEED = 0.10
+# Linear speed mapping for action[0] in [-1, 1]. The teammate controller used [0.10, 0.22]
+# (never stops); with 0.0 the robot can stop and wait for the pedestrian in narrow corridors.
+# The trainer writes the value actually used to rl/policy_meta.json for the controller.
+MIN_LINEAR_SPEED = 0.0
 
 
 class MissionEnv(ApartmentGymEnv):
@@ -52,8 +54,10 @@ class MissionEnv(ApartmentGymEnv):
         randomize_pedestrian: bool = True,
         max_steps: int = 4500,
         pose_jitter: float = 0.10,
+        min_speed: float = MIN_LINEAR_SPEED,
     ):
         super().__init__(layout_path)
+        self.min_speed = min_speed
         self.random_leg_start = random_leg_start
         self.randomize_pedestrian = randomize_pedestrian
         self.max_steps = max_steps
@@ -134,7 +138,7 @@ class MissionEnv(ApartmentGymEnv):
     def step(self, action: np.ndarray):
         self.step_count += 1
 
-        v = (float(action[0]) + 1.0) / 2.0 * (MAX_LINEAR_SPEED - MIN_LINEAR_SPEED) + MIN_LINEAR_SPEED
+        v = (float(action[0]) + 1.0) / 2.0 * (MAX_LINEAR_SPEED - self.min_speed) + self.min_speed
         w = float(action[1]) * MAX_ANGULAR_SPEED
 
         self.robot_theta += w * DT
@@ -157,8 +161,8 @@ class MissionEnv(ApartmentGymEnv):
 
         # Keep clear of the pedestrian and of walls
         dist_ped = math.hypot(self.robot_x - self.ped_x, self.robot_y - self.ped_y)
-        if dist_ped < 0.6:
-            reward -= 0.2 * (0.6 - dist_ped)
+        if dist_ped < 0.8:
+            reward -= 0.3 * (0.8 - dist_ped)
         min_lidar = float(np.min(lidar))
         if min_lidar < 0.20:
             reward -= 0.1 * (0.20 - min_lidar) / 0.20
@@ -210,9 +214,9 @@ class MissionEnv(ApartmentGymEnv):
         return obs, reward, terminated, truncated, info
 
 
-def make_train_env() -> MissionEnv:
-    return MissionEnv(random_leg_start=True, randomize_pedestrian=True)
+def make_train_env(min_speed: float = MIN_LINEAR_SPEED) -> MissionEnv:
+    return MissionEnv(random_leg_start=True, randomize_pedestrian=True, min_speed=min_speed)
 
 
-def make_eval_env() -> MissionEnv:
-    return MissionEnv(random_leg_start=False, randomize_pedestrian=True)
+def make_eval_env(min_speed: float = MIN_LINEAR_SPEED) -> MissionEnv:
+    return MissionEnv(random_leg_start=False, randomize_pedestrian=True, min_speed=min_speed)

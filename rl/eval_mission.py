@@ -18,6 +18,23 @@ from rl.mission_env import RED_APPLES, START_POSE, make_eval_env  # noqa: E402
 RL_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
+def load_model(path: str, device: str = "cpu") -> PPO:
+    """PPO.load that also opens zips pickled under numpy 2.x when running on numpy 1.x."""
+    try:
+        return PPO.load(path, device=device)
+    except ModuleNotFoundError as e:
+        if "numpy._core" not in str(e):
+            raise
+        import numpy.core as _core
+        sys.modules.setdefault("numpy._core", _core)
+        for sub in ("multiarray", "numeric", "_multiarray_umath"):
+            try:
+                sys.modules.setdefault(f"numpy._core.{sub}", __import__(f"numpy.core.{sub}", fromlist=[sub]))
+            except ImportError:
+                pass
+        return PPO.load(path, device=device)
+
+
 def run_episode(model: PPO, env, deterministic: bool = True):
     obs, _ = env.reset()
     traj = [(env.robot_x, env.robot_y)]
@@ -35,8 +52,8 @@ def run_episode(model: PPO, env, deterministic: bool = True):
     return traj, ped, info, steps
 
 
-def evaluate(model: PPO, episodes: int = 10, verbose: bool = True) -> Dict[str, float]:
-    env = make_eval_env()
+def evaluate(model: PPO, episodes: int = 10, verbose: bool = True, min_speed: float = 0.0) -> Dict[str, float]:
+    env = make_eval_env(min_speed)
     succ = wall = pedc = 0
     legs_total = 0
     steps_total = 0
@@ -101,11 +118,21 @@ def main():
     parser.add_argument("--model", type=str, default=os.path.join(RL_DIR, "amr_mission_ppo_model.zip"))
     parser.add_argument("--episodes", type=int, default=10)
     parser.add_argument("--plot", action="store_true")
+    parser.add_argument("--min-speed", type=float, default=None,
+                        help="Speed mapping the model was trained with (default: read rl/policy_meta.json, else 0.10)")
     args = parser.parse_args()
+    if args.min_speed is None:
+        meta = os.path.join(RL_DIR, "policy_meta.json")
+        args.min_speed = 0.10
+        if os.path.exists(meta):
+            import json
+            with open(meta) as f:
+                args.min_speed = float(json.load(f).get("v_min", 0.10))
+    print(f"speed mapping: v in [{args.min_speed:.2f}, 0.22]")
 
     print(f"Loading {args.model}")
-    model = PPO.load(args.model, device="cpu")
-    stats = evaluate(model, episodes=args.episodes, verbose=True)
+    model = load_model(args.model)
+    stats = evaluate(model, episodes=args.episodes, verbose=True, min_speed=args.min_speed)
     print(f"\nsuccess={stats['success_rate']*100:.0f}%  legs/ep={stats['avg_legs']:.2f}  "
           f"wall={stats['wall_rate']*100:.0f}%  ped={stats['ped_rate']*100:.0f}%  steps/ep={stats['avg_steps']:.0f}")
     if args.plot:

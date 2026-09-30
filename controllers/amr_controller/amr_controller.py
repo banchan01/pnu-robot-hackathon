@@ -144,6 +144,18 @@ except Exception as e:
     print(f"[RL] RL model not loaded ({e}). Using rule-based navigation.")
 
 
+# Speed mapping the deployed policy was trained with (written by rl/train_mission_ppo.py --deploy)
+RL_V_MIN, RL_V_MAX = 0.10, 0.22
+try:
+    with open(os.path.join(os.path.dirname(RL_MODEL_PATH), "policy_meta.json")) as _f:
+        _meta = json.load(_f)
+        RL_V_MIN = float(_meta.get("v_min", RL_V_MIN))
+        RL_V_MAX = float(_meta.get("v_max", RL_V_MAX))
+        print(f"[RL] policy speed mapping v in [{RL_V_MIN:.2f}, {RL_V_MAX:.2f}] (from policy_meta.json)")
+except Exception:
+    pass
+
+
 def predict_rl_speeds(model, ranges, goal_dist, goal_bearing, start_dist):
     count = len(ranges)
     sector_ranges = np.empty(36, dtype=np.float32)
@@ -163,7 +175,7 @@ def predict_rl_speeds(model, ranges, goal_dist, goal_bearing, start_dist):
     obs[39] = norm_start
 
     action, _ = model.predict(obs, deterministic=True)
-    v = 0.10 + (float(action[0]) + 1.0) / 2.0 * (0.22 - 0.10)  # Guaranteed positive forward velocity
+    v = RL_V_MIN + (float(action[0]) + 1.0) / 2.0 * (RL_V_MAX - RL_V_MIN)  # mapping matches training env
     w = float(action[1]) * 2.0  # rad/s
 
     left_speed = (v - w * AXLE_LENGTH_M / 2.0) / WHEEL_RADIUS_M

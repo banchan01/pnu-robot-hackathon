@@ -103,6 +103,8 @@ def main():
     parser.add_argument("--deploy", action="store_true",
                         help="Also overwrite rl/amr_ppo_model.zip (the file amr_controller loads)")
     parser.add_argument("--eval-episodes", type=int, default=10, help="Full-mission eval episodes after training")
+    parser.add_argument("--min-speed", type=float, default=0.0,
+                        help="Minimum forward speed mapped from action (0.0 lets the robot stop; teammate model used 0.10)")
     args = parser.parse_args()
 
     if args.device == "auto":
@@ -118,8 +120,8 @@ def main():
 
     vec_cls = DummyVecEnv if args.no_subproc else SubprocVecEnv
     vec_env = make_vec_env(MissionEnv, n_envs=args.envs, vec_env_cls=vec_cls,
-                           env_kwargs=dict(random_leg_start=True, randomize_pedestrian=True))
-    eval_env = DummyVecEnv([make_eval_env])
+                           env_kwargs=dict(random_leg_start=True, randomize_pedestrian=True, min_speed=args.min_speed))
+    eval_env = DummyVecEnv([lambda: make_eval_env(args.min_speed)])
 
     save_dir = os.path.join(RL_DIR, f"best_{args.tag}_model")
     eval_cb = EvalCallback(
@@ -171,13 +173,13 @@ def main():
 
     # Pick the better of final vs. best-on-eval, then run a full-mission evaluation
     best_zip = os.path.join(save_dir, "best_model.zip")
-    from rl.eval_mission import evaluate  # noqa: E402
+    from rl.eval_mission import evaluate, load_model  # noqa: E402
 
     candidates = [("final", final_zip)] + ([("best", best_zip)] if os.path.exists(best_zip) else [])
     results = []
     for name, path in candidates:
-        m = PPO.load(path, device="cpu")
-        stats = evaluate(m, episodes=args.eval_episodes, verbose=False)
+        m = load_model(path)
+        stats = evaluate(m, episodes=args.eval_episodes, verbose=False, min_speed=args.min_speed)
         print(f"[EVAL:{name}] success={stats['success_rate']*100:.0f}% legs/ep={stats['avg_legs']:.2f} "
               f"wall={stats['wall_rate']*100:.0f}% ped={stats['ped_rate']*100:.0f}% steps/ep={stats['avg_steps']:.0f}")
         results.append((stats["success_rate"], stats["avg_legs"], name, path))
@@ -188,7 +190,11 @@ def main():
     if args.deploy:
         deploy_zip = os.path.join(RL_DIR, "amr_ppo_model.zip")
         shutil.copyfile(chosen_path, deploy_zip)
-        print(f"[DEPLOY] copied to {deploy_zip} (amr_controller loads this file)")
+        import json
+        with open(os.path.join(RL_DIR, "policy_meta.json"), "w") as f:
+            json.dump({"v_min": args.min_speed, "v_max": 0.22, "source": os.path.basename(chosen_path),
+                       "timesteps": int(model.num_timesteps), "tag": args.tag}, f, indent=2)
+        print(f"[DEPLOY] copied to {deploy_zip} (amr_controller loads this file); wrote policy_meta.json")
     else:
         print("[INFO] Not deployed. Re-run with --deploy, or copy the chosen zip to rl/amr_ppo_model.zip")
 
