@@ -1,0 +1,768 @@
+{
+  "elapsed_s": 842.5600000000001,
+  "rescued": [
+    {
+      "x": 4.993997579006636,
+      "y": 2.9577365010825547,
+      "t": 282.048
+    },
+    {
+      "x": 11.658042987079364,
+      "y": -4.443747887781543,
+      "t": 688.448
+    }
+  ],
+  "targets_left": 0,
+  "explored_ratio": 0.3279783950617284,
+  "path_length_m": 55.07182823622766,
+  "final_pose": [
+    0.167222648098457,
+    0.019648709365165013,
+    0.04798266497715886
+  ],
+  "return_error_m": 0.1683730554951626,
+  "stats": {
+    "replans": 2,
+    "stuck_events": 0,
+    "block_events": 10,
+    "min_front_m": 0.129450261592865,
+    "scan_corrections": 323
+  },
+  "forbidden_seen": 1688,
+  "events": [
+    {
+      "t": 0.0,
+      "msg": "tb3_mission 시작. timestep=64 ms, 목표=['red'] x2, 제한시간=1800.0s"
+    },
+    {
+      "t": 0.192,
+      "msg": "원점 설정 완료. 탐색 시작."
+    },
+    {
+      "t": 5.056,
+      "msg": "EXPLORE 도착 지점 회전 11deg | pose=(0.35,-0.27,-55deg) 탐색률=2.4% 시야=55% 남은목표=2 헛돔=0.00m 보정=0.03m | GT오차 0.011 m / 0.0 deg GT=(0.34,-0.27) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 10.112,
+      "msg": "EXPLORE 도착 지점 회전 220deg | pose=(0.35,-0.27,154deg) 탐색률=2.4% 시야=70% 남은목표=2 헛돔=0.00m 보정=0.03m | GT오차 0.012 m / 0.0 deg GT=(0.34,-0.27) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 15.168000000000001,
+      "msg": "EXPLORE frontier (2.0, 1.4) 크기=41 거리=2.0 | pose=(0.39,-0.28,-13deg) 탐색률=2.5% 시야=75% 남은목표=2 헛돔=0.00m 보정=0.03m | GT오차 0.010 m / 0.0 deg GT=(0.39,-0.28) cmd_v=0.08 cmd_w=+0.32 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 20.224,
+      "msg": "EXPLORE frontier (2.0, 1.4) 크기=41 거리=2.0 | pose=(0.90,-0.01,51deg) 탐색률=2.9% 시야=75% 남은목표=2 헛돔=0.00m 보정=0.04m | GT오차 0.010 m / 0.0 deg GT=(0.89,-0.01) cmd_v=0.18 cmd_w=+0.03 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 25.28,
+      "msg": "EXPLORE 도착 지점 회전 106deg | pose=(1.17,0.31,153deg) 탐색률=3.3% 시야=69% 남은목표=2 헛돔=0.00m 보정=0.04m | GT오차 0.011 m / 0.0 deg GT=(1.16,0.32) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 30.336000000000002,
+      "msg": "EXPLORE 도착 지점 회전 316deg | pose=(1.17,0.31,3deg) 탐색률=3.3% 시야=74% 남은목표=2 헛돔=0.00m 보정=0.04m | GT오차 0.011 m / 0.0 deg GT=(1.16,0.32) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 35.392,
+      "msg": "EXPLORE 도착 지점 회전 37deg | pose=(1.51,0.60,75deg) 탐색률=4.1% 시야=72% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.026 m / 0.0 deg GT=(1.49,0.62) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=[]"
+    },
+    {
+      "t": 40.448,
+      "msg": "EXPLORE 도착 지점 회전 247deg | pose=(1.51,0.60,-75deg) 탐색률=4.3% 시야=68% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.025 m / 0.0 deg GT=(1.49,0.62) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 45.504,
+      "msg": "EXPLORE 도착 지점 회전 32deg | pose=(1.65,0.75,87deg) 탐색률=4.7% 시야=71% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.026 m / 0.0 deg GT=(1.63,0.77) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 50.56,
+      "msg": "EXPLORE 도착 지점 회전 241deg | pose=(1.65,0.75,-63deg) 탐색률=5.0% 시야=68% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.026 m / 0.0 deg GT=(1.63,0.77) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 55.616,
+      "msg": "EXPLORE 도착 지점 회전 27deg | pose=(1.73,0.93,101deg) 탐색률=5.3% 시야=69% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.029 m / 0.0 deg GT=(1.72,0.96) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 60.672000000000004,
+      "msg": "EXPLORE 도착 지점 회전 236deg | pose=(1.73,0.93,-50deg) 탐색률=5.4% 시야=71% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.029 m / 0.0 deg GT=(1.72,0.96) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 65.728,
+      "msg": "EXPLORE frontier (0.9, 1.2) 크기=14 거리=1.0 | pose=(1.72,1.09,108deg) 탐색률=5.5% 시야=72% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.032 m / 0.0 deg GT=(1.71,1.12) cmd_v=0.11 cmd_w=+0.22 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 70.784,
+      "msg": "EXPLORE 도착 지점 회전 167deg | pose=(1.68,1.19,-73deg) 탐색률=5.7% 시야=75% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.034 m / 0.0 deg GT=(1.67,1.22) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 75.84,
+      "msg": "EXPLORE frontier (2.4, 3.8) 크기=26 거리=2.6 | pose=(1.67,1.22,115deg) 탐색률=5.7% 시야=76% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.033 m / 0.0 deg GT=(1.65,1.25) cmd_v=0.08 cmd_w=-0.32 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 80.896,
+      "msg": "EXPLORE frontier (2.4, 3.8) 크기=26 거리=2.6 | pose=(1.81,1.82,59deg) 탐색률=5.8% 시야=78% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.043 m / 0.0 deg GT=(1.80,1.86) cmd_v=0.17 cmd_w=-0.05 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 85.952,
+      "msg": "EXPLORE frontier (2.4, 3.8) 크기=26 거리=2.6 | pose=(2.21,2.59,69deg) 탐색률=6.2% 시야=77% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.049 m / 0.0 deg GT=(2.20,2.64) cmd_v=0.18 cmd_w=+0.02 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 91.008,
+      "msg": "EXPLORE 도착 지점 회전 199deg | pose=(2.22,2.63,-92deg) 탐색률=6.3% 시야=78% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.050 m / 0.0 deg GT=(2.21,2.68) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 96.06400000000001,
+      "msg": "EXPLORE frontier (2.2, 4.2) 크기=26 거리=1.6 | pose=(2.29,2.81,70deg) 탐색률=6.3% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.07m | GT오차 0.052 m / 0.0 deg GT=(2.28,2.87) cmd_v=0.18 cmd_w=+0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 101.12,
+      "msg": "EXPLORE 도착 지점 회전 130deg | pose=(2.40,3.15,-160deg) 탐색률=7.0% 시야=78% 남은목표=2 헛돔=0.00m 보정=0.09m | GT오차 0.041 m / 0.0 deg GT=(2.40,3.19) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 106.176,
+      "msg": "EXPLORE 도착 지점 회전 339deg | pose=(2.40,3.15,50deg) 탐색률=7.0% 시야=77% 남은목표=2 헛돔=0.00m 보정=0.09m | GT오차 0.042 m / 0.0 deg GT=(2.40,3.19) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 111.232,
+      "msg": "EXPLORE 도착 지점 회전 125deg | pose=(2.44,3.35,-148deg) 탐색률=7.6% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.09m | GT오차 0.045 m / 0.0 deg GT=(2.44,3.40) cmd_v=0.00 cmd_w=+0.80 scale=0.0 static=0.0s run=[]"
+    },
+    {
+      "t": 116.288,
+      "msg": "EXPLORE 도착 지점 회전 334deg | pose=(2.44,3.35,61deg) 탐색률=7.6% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.09m | GT오차 0.046 m / 0.0 deg GT=(2.44,3.40) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 121.34400000000001,
+      "msg": "EXPLORE frontier (4.3, 0.2) 크기=17 거리=4.8 | pose=(2.44,3.35,-135deg) 탐색률=7.6% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.09m | GT오차 0.045 m / 0.0 deg GT=(2.44,3.40) cmd_v=0.00 cmd_w=+0.30 scale=0.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 126.4,
+      "msg": "EXPLORE frontier (4.3, 0.2) 크기=17 거리=4.8 | pose=(2.30,2.66,-95deg) 탐색률=7.6% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.15m | GT오차 0.049 m / 0.0 deg GT=(2.28,2.71) cmd_v=0.18 cmd_w=-0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 131.456,
+      "msg": "EXPLORE frontier (4.3, 0.2) 크기=17 거리=4.8 | pose=(2.20,1.77,-99deg) 탐색률=7.6% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.17m | GT오차 0.058 m / 0.0 deg GT=(2.17,1.81) cmd_v=0.18 cmd_w=-0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 136.512,
+      "msg": "EXPLORE frontier (4.3, 0.2) 크기=17 거리=4.8 | pose=(2.05,0.90,-88deg) 탐색률=7.7% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.19m | GT오차 0.055 m / 0.0 deg GT=(2.04,0.95) cmd_v=0.12 cmd_w=+0.31 scale=1.0 static=0.0s run=['Action: FollowPath [R]']"
+    },
+    {
+      "t": 141.568,
+      "msg": "EXPLORE 도착 지점 회전 130deg | pose=(2.11,0.70,71deg) 탐색률=7.7% 시야=81% 남은목표=2 헛돔=0.00m 보정=0.22m | GT오차 0.066 m / 0.0 deg GT=(2.10,0.77) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=[]"
+    },
+    {
+      "t": 146.624,
+      "msg": "EXPLORE 도착 지점 회전 340deg | pose=(2.11,0.70,-79deg) 탐색률=7.8% 시야=81% 남은목표=2 헛돔=0.00m 보정=0.22m | GT오차 0.066 m / 0.0 deg GT=(2.10,0.77) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=[]"
+    },
+    {
+      "t": 147.264,
+      "msg": "frontier 없음 → 블랙리스트 초기화 후 재시도"
+    },
+    {
+      "t": 147.392,
+      "msg": "frontier 소진 → 탐색 종료"
+    },
+    {
+      "t": 151.68,
+      "msg": "EXPLORE 도착 지점 회전 8deg | pose=(2.58,0.28,-22deg) 탐색률=8.0% 시야=81% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.060 m / 0.0 deg GT=(2.58,0.34) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 156.736,
+      "msg": "EXPLORE 도착 지점 회전 218deg | pose=(2.58,0.28,-173deg) 탐색률=8.1% 시야=82% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.059 m / 0.0 deg GT=(2.58,0.34) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 161.792,
+      "msg": "EXPLORE 도착 지점 회전 3deg | pose=(2.80,0.17,-22deg) 탐색률=8.2% 시야=81% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.059 m / 0.0 deg GT=(2.80,0.23) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 166.848,
+      "msg": "EXPLORE 도착 지점 회전 212deg | pose=(2.80,0.17,-172deg) 탐색률=8.3% 시야=81% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.058 m / 0.0 deg GT=(2.80,0.23) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 171.904,
+      "msg": "EXPLORE frontier (5.1, -0.7) 크기=68 거리=2.3 | pose=(3.03,0.08,-21deg) 탐색률=8.4% 시야=81% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.057 m / 0.0 deg GT=(3.03,0.14) cmd_v=0.18 cmd_w=+0.03 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 176.96,
+      "msg": "EXPLORE 도착 지점 회전 207deg | pose=(3.04,0.07,-174deg) 탐색률=8.7% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.056 m / 0.0 deg GT=(3.04,0.13) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 182.016,
+      "msg": "EXPLORE frontier (5.5, -0.4) 크기=51 거리=2.5 | pose=(3.24,0.01,-14deg) 탐색률=8.9% 시야=79% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.056 m / 0.0 deg GT=(3.25,0.07) cmd_v=0.17 cmd_w=+0.07 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 187.072,
+      "msg": "EXPLORE 도착 지점 회전 202deg | pose=(3.27,0.01,-172deg) 탐색률=9.2% 시야=77% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.055 m / 0.0 deg GT=(3.28,0.06) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 192.12800000000001,
+      "msg": "EXPLORE frontier (5.5, -1.2) 크기=51 거리=2.2 | pose=(3.44,-0.05,-22deg) 탐색률=9.3% 시야=78% 남은목표=2 헛돔=0.00m 보정=0.26m | GT오차 0.056 m / 0.0 deg GT=(3.45,0.01) cmd_v=0.16 cmd_w=-0.12 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 197.184,
+      "msg": "EXPLORE 도착 지점 회전 133deg | pose=(3.72,-0.18,102deg) 탐색률=9.8% 시야=78% 남은목표=2 헛돔=0.00m 보정=0.29m | GT오차 0.047 m / 0.0 deg GT=(3.72,-0.13) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 202.24,
+      "msg": "EXPLORE 도착 지점 회전 342deg | pose=(3.72,-0.18,-49deg) 탐색률=9.9% 시야=77% 남은목표=2 헛돔=0.00m 보정=0.29m | GT오차 0.048 m / 0.0 deg GT=(3.72,-0.13) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 207.296,
+      "msg": "EXPLORE 도착 지점 회전 64deg | pose=(4.16,-0.47,27deg) 탐색률=10.7% 시야=76% 남은목표=2 헛돔=0.00m 보정=0.29m | GT오차 0.045 m / 0.0 deg GT=(4.16,-0.43) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 212.352,
+      "msg": "EXPLORE 도착 지점 회전 273deg | pose=(4.16,-0.47,-124deg) 탐색률=10.8% 시야=76% 남은목표=2 헛돔=0.00m 보정=0.29m | GT오차 0.044 m / 0.0 deg GT=(4.16,-0.43) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 217.40800000000002,
+      "msg": "EXPLORE frontier (4.2, 1.7) 크기=29 거리=2.2 | pose=(4.27,-0.40,45deg) 탐색률=11.0% 시야=76% 남은목표=2 헛돔=0.00m 보정=0.32m | GT오차 0.046 m / 0.0 deg GT=(4.27,-0.36) cmd_v=0.09 cmd_w=+0.22 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 222.464,
+      "msg": "EXPLORE frontier (4.2, 1.7) 크기=29 거리=2.2 | pose=(4.39,0.23,93deg) 탐색률=11.3% 시야=77% 남은목표=2 헛돔=0.00m 보정=0.37m | GT오차 0.062 m / 0.0 deg GT=(4.39,0.30) cmd_v=0.17 cmd_w=-0.05 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 227.52,
+      "msg": "EXPLORE 도착 지점 회전 159deg | pose=(4.39,0.42,-112deg) 탐색률=11.8% 시야=75% 남은목표=2 헛돔=0.00m 보정=0.37m | GT오차 0.064 m / 0.0 deg GT=(4.38,0.49) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 232.576,
+      "msg": "EXPLORE frontier (3.7, 2.2) 크기=58 거리=1.8 | pose=(4.39,0.43,90deg) 탐색률=11.8% 시야=75% 남은목표=2 헛돔=0.00m 보정=0.37m | GT오차 0.064 m / 0.0 deg GT=(4.38,0.50) cmd_v=0.09 cmd_w=-0.06 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 237.632,
+      "msg": "EXPLORE 도착 지점 회전 90deg | pose=(4.42,0.90,174deg) 탐색률=12.1% 시야=77% 남은목표=2 헛돔=0.00m 보정=0.39m | GT오차 0.068 m / 0.0 deg GT=(4.42,0.97) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 242.68800000000002,
+      "msg": "EXPLORE 도착 지점 회전 300deg | pose=(4.42,0.90,24deg) 탐색률=12.1% 시야=76% 남은목표=2 헛돔=0.00m 보정=0.39m | GT오차 0.069 m / 0.0 deg GT=(4.42,0.97) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 247.744,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=1.8 | pose=(4.58,0.92,-8deg) 탐색률=12.2% 시야=76% 남은목표=2 헛돔=0.00m 보정=0.43m | GT오차 0.077 m / 0.0 deg GT=(4.59,1.00) cmd_v=0.11 cmd_w=-0.22 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 252.8,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=1.8 | pose=(4.85,0.77,-47deg) 탐색률=12.3% 시야=76% 남은목표=2 헛돔=0.00m 보정=0.45m | GT오차 0.073 m / 0.0 deg GT=(4.87,0.84) cmd_v=0.00 cmd_w=-0.01 scale=0.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 257.856,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=1.8 | pose=(4.85,0.76,-47deg) 탐색률=12.3% 시야=76% 남은목표=2 헛돔=0.01m 보정=0.45m | GT오차 0.070 m / 0.0 deg GT=(4.88,0.83) cmd_v=0.00 cmd_w=-0.00 scale=0.0 static=1.7s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 260.992,
+      "msg": "전방 막힘 지속 → 회피 기동"
+    },
+    {
+      "t": 262.912,
+      "msg": "RECOVERY 후진 | pose=(4.76,0.87,-47deg) 탐색률=12.4% 시야=76% 남은목표=2 헛돔=0.01m 보정=0.45m | GT오차 0.073 m / 0.0 deg GT=(4.78,0.94) cmd_v=-0.08 cmd_w=+0.00 scale=0.5 static=0.0s run=['Action: Escape [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 267.968,
+      "msg": "EXPLORE frontier (5.4, 2.9) 크기=92 거리=2.6 | pose=(4.69,0.93,138deg) 탐색률=12.7% 시야=74% 남은목표=2 헛돔=0.01m 보정=0.49m | GT오차 0.064 m / 0.0 deg GT=(4.70,1.00) cmd_v=0.08 cmd_w=-0.34 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 273.024,
+      "msg": "EXPLORE frontier (5.4, 2.9) 크기=92 거리=2.6 | pose=(4.57,1.54,85deg) 탐색률=13.1% 시야=74% 남은목표=2 헛돔=0.01m 보정=0.53m | GT오차 0.080 m / 0.0 deg GT=(4.59,1.62) cmd_v=0.18 cmd_w=-0.02 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 278.08,
+      "msg": "EXPLORE frontier (5.4, 2.9) 크기=92 거리=2.6 | pose=(4.54,2.42,99deg) 탐색률=13.4% 시야=75% 남은목표=2 헛돔=0.01m 보정=0.56m | GT오차 0.068 m / 0.0 deg GT=(4.56,2.48) cmd_v=0.18 cmd_w=+0.03 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 281.408,
+      "msg": "목표 확정 (red) 위치=(4.95, 2.93) 거리=0.41 m (연속 5프레임)"
+    },
+    {
+      "t": 281.408,
+      "msg": "검출 스냅샷 저장: /tmp/tb3_out17/detect_281s.png"
+    },
+    {
+      "t": 282.048,
+      "msg": "사과 앞 도착: 추정 거리 0.45 m, 전방 LiDAR 0.25 m"
+    },
+    {
+      "t": 282.048,
+      "msg": "구출 완료 #1 위치=(4.99, 2.96) 남은 목표=1"
+    },
+    {
+      "t": 283.136,
+      "msg": "RESCUE 기록 중 | pose=(4.60,2.72,35deg) 탐색률=13.5% 시야=75% 남은목표=1 헛돔=0.01m 보정=0.61m | GT오차 0.064 m / 0.0 deg GT=(4.62,2.78) cmd_v=0.00 cmd_w=+0.00 scale=0.5 static=0.7s run=['Action: MarkRescued [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 288.192,
+      "msg": "EXPLORE frontier (4.2, 4.4) 크기=20 거리=1.7 | pose=(4.58,3.05,116deg) 탐색률=13.5% 시야=76% 남은목표=1 헛돔=0.01m 보정=0.62m | GT오차 0.058 m / 0.0 deg GT=(4.61,3.10) cmd_v=0.12 cmd_w=+0.31 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 293.248,
+      "msg": "EXPLORE frontier (4.2, 4.4) 크기=20 거리=1.7 | pose=(4.09,3.70,122deg) 탐색률=13.6% 시야=77% 남은목표=1 헛돔=0.01m 보정=0.63m | GT오차 0.056 m / 0.0 deg GT=(4.10,3.75) cmd_v=0.12 cmd_w=-0.25 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 298.30400000000003,
+      "msg": "EXPLORE 도착 지점 회전 207deg | pose=(4.08,3.71,-32deg) 탐색률=13.6% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.63m | GT오차 0.057 m / 0.0 deg GT=(4.10,3.76) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 303.36,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=4.9 | pose=(4.08,3.71,175deg) 탐색률=13.6% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.63m | GT오차 0.056 m / 0.0 deg GT=(4.10,3.76) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 308.416,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=4.9 | pose=(4.01,3.35,-75deg) 탐색률=13.7% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.65m | GT오차 0.054 m / 0.0 deg GT=(4.03,3.40) cmd_v=0.14 cmd_w=+0.17 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 313.472,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=4.9 | pose=(4.35,2.59,-70deg) 탐색률=13.7% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.65m | GT오차 0.055 m / 0.0 deg GT=(4.38,2.63) cmd_v=0.17 cmd_w=-0.06 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 318.528,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=4.9 | pose=(4.59,1.74,-77deg) 탐색률=13.7% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.66m | GT오차 0.046 m / 0.0 deg GT=(4.61,1.77) cmd_v=0.18 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 323.584,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=4.9 | pose=(4.80,0.87,-76deg) 탐색률=13.7% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.66m | GT오차 0.041 m / 0.0 deg GT=(4.83,0.89) cmd_v=0.18 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 328.64,
+      "msg": "EXPLORE frontier (6.0, 1.2) 크기=16 거리=4.9 | pose=(5.02,0.19,-47deg) 탐색률=14.1% 시야=77% 남은목표=1 헛돔=0.01m 보정=0.74m | GT오차 0.024 m / 0.0 deg GT=(5.03,0.21) cmd_v=0.08 cmd_w=+0.28 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 333.696,
+      "msg": "EXPLORE 도착 지점 회전 104deg | pose=(5.23,0.09,93deg) 탐색률=14.5% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.75m | GT오차 0.020 m / 0.0 deg GT=(5.23,0.11) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 338.752,
+      "msg": "EXPLORE 도착 지점 회전 313deg | pose=(5.23,0.09,-58deg) 탐색률=14.6% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.75m | GT오차 0.021 m / 0.0 deg GT=(5.23,0.11) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 343.808,
+      "msg": "EXPLORE 도착 지점 회전 98deg | pose=(5.49,0.05,90deg) 탐색률=14.9% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.78m | GT오차 0.020 m / 0.0 deg GT=(5.49,0.07) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 348.86400000000003,
+      "msg": "EXPLORE 도착 지점 회전 308deg | pose=(5.49,0.05,-60deg) 탐색률=14.9% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.78m | GT오차 0.020 m / 0.0 deg GT=(5.49,0.07) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 353.92,
+      "msg": "EXPLORE frontier (7.2, 1.5) 크기=16 거리=2.1 | pose=(5.77,0.21,54deg) 탐색률=15.1% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.80m | GT오차 0.022 m / 0.0 deg GT=(5.77,0.23) cmd_v=0.12 cmd_w=+0.30 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 358.976,
+      "msg": "EXPLORE frontier (7.2, 1.5) 크기=16 거리=2.1 | pose=(6.07,0.97,66deg) 탐색률=15.6% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.81m | GT오차 0.037 m / 0.0 deg GT=(6.07,1.01) cmd_v=0.17 cmd_w=-0.06 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 364.032,
+      "msg": "EXPLORE 도착 지점 회전 194deg | pose=(6.09,1.03,-101deg) 탐색률=16.4% 시야=75% 남은목표=1 헛돔=0.01m 보정=0.81m | GT오차 0.038 m / 0.0 deg GT=(6.10,1.07) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 369.088,
+      "msg": "EXPLORE frontier (6.3, 3.6) 크기=135 거리=2.6 | pose=(6.14,1.16,76deg) 탐색률=16.4% 시야=77% 남은목표=1 헛돔=0.01m 보정=0.81m | GT오차 0.040 m / 0.0 deg GT=(6.14,1.20) cmd_v=0.15 cmd_w=+0.14 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 374.144,
+      "msg": "EXPLORE 도착 지점 회전 125deg | pose=(6.17,1.48,-149deg) 탐색률=16.8% 시야=76% 남은목표=1 헛돔=0.01m 보정=0.83m | GT오차 0.059 m / 0.0 deg GT=(6.19,1.53) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 379.2,
+      "msg": "EXPLORE 도착 지점 회전 334deg | pose=(6.17,1.48,61deg) 탐색률=16.9% 시야=76% 남은목표=1 헛돔=0.01m 보정=0.83m | GT오차 0.059 m / 0.0 deg GT=(6.19,1.53) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 384.25600000000003,
+      "msg": "EXPLORE frontier (5.9, 3.7) 크기=38 거리=2.2 | pose=(6.22,2.25,87deg) 탐색률=17.6% 시야=75% 남은목표=1 헛돔=0.01m 보정=0.83m | GT오차 0.067 m / 0.0 deg GT=(6.23,2.31) cmd_v=0.18 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 389.312,
+      "msg": "EXPLORE 도착 지점 회전 138deg | pose=(6.23,2.55,-136deg) 탐색률=17.9% 시야=76% 남은목표=1 헛돔=0.01m 보정=0.85m | GT오차 0.071 m / 0.0 deg GT=(6.25,2.62) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 394.368,
+      "msg": "EXPLORE 도착 지점 회전 347deg | pose=(6.23,2.55,74deg) 탐색률=18.0% 시야=76% 남은목표=1 헛돔=0.01m 보정=0.85m | GT오차 0.072 m / 0.0 deg GT=(6.25,2.62) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 399.42400000000004,
+      "msg": "EXPLORE 도착 지점 회전 69deg | pose=(6.22,3.04,172deg) 탐색률=18.2% 시야=77% 남은목표=1 헛돔=0.01m 보정=0.87m | GT오차 0.064 m / 0.0 deg GT=(6.24,3.10) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 404.48,
+      "msg": "EXPLORE 도착 지점 회전 279deg | pose=(6.22,3.04,22deg) 탐색률=18.2% 시야=77% 남은목표=1 헛돔=0.01m 보정=0.87m | GT오차 0.064 m / 0.0 deg GT=(6.24,3.10) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 409.536,
+      "msg": "EXPLORE frontier (7.9, 3.8) 크기=19 거리=1.7 | pose=(6.30,3.27,51deg) 탐색률=18.3% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.88m | GT오차 0.062 m / 0.0 deg GT=(6.33,3.33) cmd_v=0.10 cmd_w=-0.29 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 414.592,
+      "msg": "EXPLORE 도착 지점 회전 83deg | pose=(6.69,3.50,104deg) 탐색률=18.5% 시야=79% 남은목표=1 헛돔=0.01m 보정=0.89m | GT오차 0.059 m / 0.0 deg GT=(6.71,3.55) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 419.648,
+      "msg": "EXPLORE 도착 지점 회전 292deg | pose=(6.69,3.50,-47deg) 탐색률=18.6% 시야=79% 남은목표=1 헛돔=0.01m 보정=0.89m | GT오차 0.060 m / 0.0 deg GT=(6.71,3.55) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 424.704,
+      "msg": "EXPLORE 도착 지점 회전 14deg | pose=(7.13,3.75,46deg) 탐색률=19.0% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.058 m / 0.0 deg GT=(7.16,3.80) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 429.76,
+      "msg": "EXPLORE 도착 지점 회전 223deg | pose=(7.13,3.75,-105deg) 탐색률=19.1% 시야=77% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.058 m / 0.0 deg GT=(7.16,3.80) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 434.81600000000003,
+      "msg": "EXPLORE 도착 지점 회전 8deg | pose=(7.31,3.83,24deg) 탐색률=19.3% 시야=79% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.061 m / 0.0 deg GT=(7.35,3.88) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 439.872,
+      "msg": "EXPLORE 도착 지점 회전 218deg | pose=(7.31,3.83,-127deg) 탐색률=19.3% 시야=78% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.061 m / 0.0 deg GT=(7.35,3.88) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 444.928,
+      "msg": "EXPLORE frontier (7.9, 0.3) 크기=33 거리=5.4 | pose=(7.31,3.83,-47deg) 탐색률=19.4% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.061 m / 0.0 deg GT=(7.35,3.88) cmd_v=0.00 cmd_w=-0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 449.98400000000004,
+      "msg": "EXPLORE frontier (7.9, 0.3) 크기=33 거리=5.4 | pose=(7.32,3.79,-124deg) 탐색률=19.4% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.061 m / 0.0 deg GT=(7.35,3.85) cmd_v=0.00 cmd_w=-0.08 scale=0.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 453.056,
+      "msg": "전방 막힘 지속 → 회피 기동"
+    },
+    {
+      "t": 455.04,
+      "msg": "RECOVERY 후진 | pose=(7.42,3.91,-129deg) 탐색률=19.4% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.061 m / 0.0 deg GT=(7.45,3.96) cmd_v=-0.08 cmd_w=+0.00 scale=0.5 static=0.0s run=['Action: Escape [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 460.096,
+      "msg": "EXPLORE frontier (7.9, 0.3) 크기=33 거리=5.5 | pose=(7.06,3.69,-129deg) 탐색률=19.4% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.056 m / 0.0 deg GT=(7.08,3.74) cmd_v=0.16 cmd_w=+0.09 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 465.152,
+      "msg": "EXPLORE frontier (7.9, 0.3) 크기=33 거리=5.5 | pose=(6.57,2.99,-120deg) 탐색률=19.4% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.90m | GT오차 0.048 m / 0.0 deg GT=(6.59,3.04) cmd_v=0.16 cmd_w=+0.12 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 470.208,
+      "msg": "EXPLORE frontier (7.9, 0.3) 크기=33 거리=5.5 | pose=(6.33,2.19,-98deg) 탐색률=19.4% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.91m | GT오차 0.049 m / 0.0 deg GT=(6.35,2.23) cmd_v=0.18 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 475.264,
+      "msg": "EXPLORE frontier (7.9, 0.3) 크기=33 거리=5.5 | pose=(6.19,1.29,-101deg) 탐색률=19.4% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.94m | GT오차 0.056 m / 0.0 deg GT=(6.20,1.34) cmd_v=0.18 cmd_w=-0.02 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 480.32,
+      "msg": "EXPLORE frontier (7.9, 0.3) 크기=33 거리=5.5 | pose=(6.03,0.42,-95deg) 탐색률=19.4% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.95m | GT오차 0.054 m / 0.0 deg GT=(6.04,0.47) cmd_v=0.13 cmd_w=+0.27 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 485.37600000000003,
+      "msg": "EXPLORE frontier (7.9, 0.3) 크기=33 거리=5.5 | pose=(6.35,-0.09,-29deg) 탐색률=20.0% 시야=79% 남은목표=1 헛돔=0.01m 보정=0.95m | GT오차 0.045 m / 0.0 deg GT=(6.36,-0.04) cmd_v=0.15 cmd_w=+0.17 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 490.432,
+      "msg": "EXPLORE 도착 지점 회전 202deg | pose=(6.38,-0.09,175deg) 탐색률=20.1% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.95m | GT오차 0.038 m / 0.0 deg GT=(6.39,-0.06) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 495.488,
+      "msg": "EXPLORE frontier (6.8, -1.9) 크기=11 거리=2.1 | pose=(6.43,-0.14,-56deg) 탐색률=20.1% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.96m | GT오차 0.029 m / 0.0 deg GT=(6.44,-0.11) cmd_v=0.08 cmd_w=-0.34 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 500.544,
+      "msg": "EXPLORE frontier (6.8, -1.9) 크기=11 거리=2.1 | pose=(6.44,-0.55,-111deg) 탐색률=20.1% 시야=80% 남은목표=1 헛돔=0.01m 보정=0.97m | GT오차 0.028 m / 0.0 deg GT=(6.45,-0.53) cmd_v=0.09 cmd_w=-0.06 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 505.6,
+      "msg": "EXPLORE frontier (6.8, -1.9) 크기=11 거리=2.1 | pose=(6.20,-1.32,-97deg) 탐색률=20.9% 시야=78% 남은목표=1 헛돔=0.01m 보정=1.03m | GT오차 0.023 m / 0.0 deg GT=(6.20,-1.29) cmd_v=0.17 cmd_w=+0.06 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 510.656,
+      "msg": "EXPLORE 도착 지점 회전 170deg | pose=(6.19,-1.44,83deg) 탐색률=21.4% 시야=78% 남은목표=1 헛돔=0.01m 보정=1.05m | GT오차 0.021 m / 0.0 deg GT=(6.19,-1.42) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 515.712,
+      "msg": "EXPLORE frontier (8.4, -2.6) 크기=62 거리=2.3 | pose=(6.19,-1.48,-79deg) 탐색률=21.5% 시야=78% 남은목표=1 헛돔=0.01m 보정=1.05m | GT오차 0.020 m / 0.0 deg GT=(6.20,-1.46) cmd_v=0.10 cmd_w=+0.33 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 520.768,
+      "msg": "EXPLORE 도착 지점 회전 101deg | pose=(6.37,-1.76,57deg) 탐색률=22.2% 시야=78% 남은목표=1 헛돔=0.01m 보정=1.06m | GT오차 0.022 m / 0.0 deg GT=(6.36,-1.74) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 525.824,
+      "msg": "EXPLORE 도착 지점 회전 310deg | pose=(6.37,-1.76,-93deg) 탐색률=22.2% 시야=77% 남은목표=1 헛돔=0.01m 보정=1.06m | GT오차 0.021 m / 0.0 deg GT=(6.36,-1.74) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 530.88,
+      "msg": "EXPLORE 도착 지점 회전 32deg | pose=(6.78,-2.03,5deg) 탐색률=22.8% 시야=78% 남은목표=1 헛돔=0.01m 보정=1.07m | GT오차 0.019 m / 0.0 deg GT=(6.78,-2.01) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 535.936,
+      "msg": "EXPLORE 도착 지점 회전 241deg | pose=(6.78,-2.03,-146deg) 탐색률=23.0% 시야=77% 남은목표=1 헛돔=0.01m 보정=1.07m | GT오차 0.018 m / 0.0 deg GT=(6.78,-2.01) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 540.992,
+      "msg": "EXPLORE frontier (6.6, -3.7) 크기=48 거리=1.7 | pose=(7.01,-2.22,-50deg) 탐색률=23.2% 시야=78% 남은목표=1 헛돔=0.01m 보정=1.07m | GT오차 0.016 m / 0.0 deg GT=(7.01,-2.20) cmd_v=0.11 cmd_w=-0.23 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 546.048,
+      "msg": "EXPLORE 도착 지점 회전 173deg | pose=(7.07,-2.31,110deg) 탐색률=23.4% 시야=79% 남은목표=1 헛돔=0.01m 보정=1.07m | GT오차 0.014 m / 0.0 deg GT=(7.07,-2.29) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 551.104,
+      "msg": "EXPLORE frontier (6.1, -4.2) 크기=42 거리=1.9 | pose=(7.09,-2.34,-68deg) 탐색률=23.4% 시야=79% 남은목표=1 헛돔=0.01m 보정=1.07m | GT오차 0.014 m / 0.0 deg GT=(7.09,-2.33) cmd_v=0.10 cmd_w=-0.27 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 556.16,
+      "msg": "EXPLORE 도착 지점 회전 40deg | pose=(7.02,-2.89,-72deg) 탐색률=23.9% 시야=79% 남은목표=1 헛돔=0.01m 보정=1.07m | GT오차 0.005 m / 0.0 deg GT=(7.02,-2.88) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 561.216,
+      "msg": "EXPLORE 도착 지점 회전 249deg | pose=(7.02,-2.89,137deg) 탐색률=24.1% 시야=79% 남은목표=1 헛돔=0.01m 보정=1.07m | GT오차 0.005 m / 0.0 deg GT=(7.02,-2.88) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 566.272,
+      "msg": "EXPLORE frontier (5.6, -5.0) 크기=37 거리=2.1 | pose=(6.85,-3.24,-119deg) 탐색률=24.8% 시야=77% 남은목표=1 헛돔=0.01m 보정=1.08m | GT오차 0.008 m / 0.0 deg GT=(6.85,-3.24) cmd_v=0.17 cmd_w=-0.04 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 571.328,
+      "msg": "EXPLORE frontier (5.6, -5.0) 크기=37 거리=2.1 | pose=(6.42,-4.01,-120deg) 탐색률=26.0% 시야=75% 남은목표=1 헛돔=0.01m 보정=1.10m | GT오차 0.029 m / 0.0 deg GT=(6.39,-4.01) cmd_v=0.18 cmd_w=+0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 576.384,
+      "msg": "EXPLORE 도착 지점 회전 199deg | pose=(6.41,-4.06,71deg) 탐색률=27.1% 시야=73% 남은목표=1 헛돔=0.01m 보정=1.17m | GT오차 0.031 m / 0.1 deg GT=(6.39,-4.03) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 581.44,
+      "msg": "EXPLORE frontier (4.3, -5.5) 크기=39 거리=2.2 | pose=(6.32,-4.18,-127deg) 탐색률=27.2% 시야=75% 남은목표=1 헛돔=0.01m 보정=1.21m | GT오차 0.034 m / 0.1 deg GT=(6.29,-4.16) cmd_v=0.17 cmd_w=+0.06 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 586.496,
+      "msg": "EXPLORE 도착 지점 회전 37deg | pose=(6.35,-4.42,-91deg) 탐색률=27.4% 시야=75% 남은목표=1 헛돔=0.01m 보정=1.46m | GT오차 0.052 m / 0.1 deg GT=(6.30,-4.45) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 591.552,
+      "msg": "EXPLORE 도착 지점 회전 38deg | pose=(6.35,-4.73,-90deg) 탐색률=27.6% 시야=75% 남은목표=1 헛돔=0.01m 보정=1.79m | GT오차 0.064 m / 0.1 deg GT=(6.31,-4.77) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 596.6080000000001,
+      "msg": "EXPLORE 도착 지점 회전 39deg | pose=(6.36,-5.02,-89deg) 탐색률=27.9% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.09m | GT오차 0.094 m / 0.1 deg GT=(6.31,-5.09) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 601.664,
+      "msg": "EXPLORE 도착 지점 회전 73deg | pose=(6.40,-5.30,-56deg) 탐색률=28.4% 시야=74% 남은목표=1 헛돔=0.01m 보정=2.39m | GT오차 0.077 m / 0.0 deg GT=(6.35,-5.36) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 606.72,
+      "msg": "EXPLORE 도착 지점 회전 272deg | pose=(6.42,-5.30,141deg) 탐색률=28.6% 시야=74% 남은목표=1 헛돔=0.01m 보정=2.44m | GT오차 0.063 m / 0.0 deg GT=(6.39,-5.36) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 611.7760000000001,
+      "msg": "EXPLORE frontier (8.1, -5.8) 크기=31 거리=1.8 | pose=(6.41,-5.47,-79deg) 탐색률=28.6% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.44m | GT오차 0.053 m / 0.0 deg GT=(6.40,-5.53) cmd_v=0.08 cmd_w=+0.29 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 616.832,
+      "msg": "EXPLORE 도착 지점 회전 11deg | pose=(6.83,-5.87,-4deg) 탐색률=29.0% 시야=76% 남은목표=1 헛돔=0.01m 보정=2.47m | GT오차 0.040 m / 0.0 deg GT=(6.82,-5.91) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 621.888,
+      "msg": "EXPLORE 도착 지점 회전 220deg | pose=(6.83,-5.87,-155deg) 탐색률=29.1% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.47m | GT오차 0.040 m / 0.0 deg GT=(6.82,-5.91) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 626.944,
+      "msg": "EXPLORE frontier (8.4, -5.6) 크기=28 거리=1.6 | pose=(7.09,-5.93,-9deg) 탐색률=29.3% 시야=76% 남은목표=1 헛돔=0.01m 보정=2.47m | GT오차 0.040 m / 0.0 deg GT=(7.09,-5.97) cmd_v=0.17 cmd_w=+0.05 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 632.0,
+      "msg": "EXPLORE 도착 지점 회전 151deg | pose=(7.34,-5.97,144deg) 탐색률=29.8% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.48m | GT오차 0.035 m / 0.0 deg GT=(7.34,-6.00) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 637.056,
+      "msg": "EXPLORE 도착 지점 회전 361deg | pose=(7.34,-5.97,-6deg) 탐색률=29.8% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.48m | GT오차 0.034 m / 0.0 deg GT=(7.34,-6.00) cmd_v=0.00 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 642.112,
+      "msg": "EXPLORE 도착 지점 회전 146deg | pose=(7.59,-6.00,136deg) 탐색률=30.3% 시야=76% 남은목표=1 헛돔=0.01m 보정=2.52m | GT오차 0.034 m / 0.0 deg GT=(7.59,-6.04) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 647.168,
+      "msg": "EXPLORE 도착 지점 회전 355deg | pose=(7.59,-6.00,-15deg) 탐색률=30.3% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.52m | GT오차 0.034 m / 0.0 deg GT=(7.59,-6.04) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 652.224,
+      "msg": "EXPLORE 도착 지점 회전 77deg | pose=(7.91,-5.92,112deg) 탐색률=30.7% 시야=76% 남은목표=1 헛돔=0.01m 보정=2.53m | GT오차 0.026 m / 0.0 deg GT=(7.91,-5.95) cmd_v=0.00 cmd_w=+0.80 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 657.28,
+      "msg": "EXPLORE 도착 지점 회전 286deg | pose=(7.91,-5.92,-39deg) 탐색률=30.8% 시야=76% 남은목표=1 헛돔=0.01m 보정=2.53m | GT오차 0.026 m / 0.0 deg GT=(7.91,-5.95) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 662.336,
+      "msg": "EXPLORE frontier (10.0, -4.6) 크기=32 거리=2.1 | pose=(8.33,-5.57,43deg) 탐색률=31.1% 시야=76% 남은목표=1 헛돔=0.01m 보정=2.54m | GT오차 0.016 m / 0.0 deg GT=(8.33,-5.59) cmd_v=0.18 cmd_w=+0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 663.616,
+      "msg": "목표 확정 (red) 위치=(11.54, -4.51) 거리=3.16 m (연속 5프레임)"
+    },
+    {
+      "t": 663.616,
+      "msg": "검출 스냅샷 저장: /tmp/tb3_out17/detect_664s.png"
+    },
+    {
+      "t": 667.392,
+      "msg": "FOLLOW standoff (14 wp, idx 3) | pose=(8.98,-4.95,42deg) 탐색률=32.0% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.56m | GT오차 0.030 m / 0.0 deg GT=(9.00,-4.97) cmd_v=0.18 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 672.448,
+      "msg": "FOLLOW standoff (14 wp, idx 7) | pose=(9.67,-4.57,13deg) 탐색률=32.2% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.57m | GT오차 0.041 m / 0.0 deg GT=(9.70,-4.60) cmd_v=0.17 cmd_w=-0.06 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 677.504,
+      "msg": "FOLLOW standoff (14 wp, idx 11) | pose=(10.55,-4.41,10deg) 탐색률=32.4% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.58m | GT오차 0.045 m / 0.0 deg GT=(10.58,-4.45) cmd_v=0.18 cmd_w=+0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 682.5600000000001,
+      "msg": "APPROACH 시각 접근 | pose=(11.01,-4.39,-5deg) 탐색률=32.5% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.68m | GT오차 0.035 m / 0.0 deg GT=(11.03,-4.42) cmd_v=0.07 cmd_w=-0.00 scale=1.0 static=0.0s run=['Action: VisualApproach [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 687.616,
+      "msg": "APPROACH 시각 접근 | pose=(11.36,-4.42,-5deg) 탐색률=32.5% 시야=75% 남은목표=1 헛돔=0.01m 보정=2.68m | GT오차 0.035 m / 0.0 deg GT=(11.38,-4.45) cmd_v=0.07 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: VisualApproach [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 688.448,
+      "msg": "사과 앞 도착: 추정 거리 0.22 m, 전방 LiDAR 0.54 m"
+    },
+    {
+      "t": 688.448,
+      "msg": "구출 완료 #2 위치=(11.66, -4.44) 남은 목표=0"
+    },
+    {
+      "t": 692.672,
+      "msg": "FOLLOW home (73 wp, idx 0) | pose=(11.42,-4.43,-92deg) 탐색률=32.5% 시야=75% 남은목표=0 헛돔=0.01m 보정=2.68m | GT오차 0.034 m / 0.0 deg GT=(11.44,-4.46) cmd_v=0.00 cmd_w=-0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 697.7280000000001,
+      "msg": "FOLLOW home (73 wp, idx 2) | pose=(11.01,-4.58,175deg) 탐색률=32.5% 시야=76% 남은목표=0 헛돔=0.01m 보정=2.68m | GT오차 0.035 m / 0.0 deg GT=(11.03,-4.61) cmd_v=0.15 cmd_w=-0.18 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 702.784,
+      "msg": "FOLLOW home (73 wp, idx 6) | pose=(10.17,-4.46,177deg) 탐색률=32.6% 시야=76% 남은목표=0 헛돔=0.01m 보정=2.68m | GT오차 0.032 m / 0.0 deg GT=(10.18,-4.49) cmd_v=0.17 cmd_w=+0.04 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 707.84,
+      "msg": "FOLLOW home (73 wp, idx 10) | pose=(9.39,-4.43,159deg) 탐색률=32.6% 시야=76% 남은목표=0 헛돔=0.01m 보정=2.68m | GT오차 0.032 m / 0.0 deg GT=(9.39,-4.46) cmd_v=0.11 cmd_w=-0.27 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 712.896,
+      "msg": "FOLLOW home (73 wp, idx 13) | pose=(9.10,-4.04,101deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.69m | GT오차 0.023 m / 0.0 deg GT=(9.08,-4.06) cmd_v=0.08 cmd_w=-0.10 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 717.952,
+      "msg": "FOLLOW home (73 wp, idx 17) | pose=(8.87,-3.46,147deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.78m | GT오차 0.030 m / 0.0 deg GT=(8.86,-3.49) cmd_v=0.12 cmd_w=+0.26 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 723.008,
+      "msg": "FOLLOW home (73 wp, idx 20) | pose=(8.11,-3.42,-173deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.79m | GT오차 0.024 m / 0.0 deg GT=(8.10,-3.44) cmd_v=0.18 cmd_w=-0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 728.064,
+      "msg": "FOLLOW home (73 wp, idx 24) | pose=(7.22,-3.50,-177deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.79m | GT오차 0.026 m / 0.0 deg GT=(7.20,-3.52) cmd_v=0.18 cmd_w=-0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 733.12,
+      "msg": "FOLLOW home (73 wp, idx 24) | pose=(7.08,-3.51,114deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.79m | GT오차 0.028 m / 0.0 deg GT=(7.06,-3.52) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 738.176,
+      "msg": "FOLLOW home (73 wp, idx 24) | pose=(7.07,-3.49,67deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.79m | GT오차 0.028 m / 0.0 deg GT=(7.05,-3.51) cmd_v=0.00 cmd_w=-0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 743.232,
+      "msg": "FOLLOW home (73 wp, idx 24) | pose=(7.08,-3.48,108deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.79m | GT오차 0.029 m / 0.0 deg GT=(7.06,-3.50) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 748.288,
+      "msg": "경로 추종 20초간 진전 없음 (cmd_w=-0.80) → 목표 포기·재계획"
+    },
+    {
+      "t": 748.288,
+      "msg": "IDLE | pose=(7.07,-3.47,93deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.79m | GT오차 0.029 m / 0.0 deg GT=(7.05,-3.49) cmd_v=0.00 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 753.344,
+      "msg": "FOLLOW home (44 wp, idx 4) | pose=(7.04,-2.57,92deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.80m | GT오차 0.028 m / 0.0 deg GT=(7.02,-2.59) cmd_v=0.18 cmd_w=+0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 758.4,
+      "msg": "FOLLOW home (44 wp, idx 8) | pose=(6.81,-1.90,139deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.82m | GT오차 0.028 m / 0.0 deg GT=(6.78,-1.92) cmd_v=0.15 cmd_w=+0.20 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 763.456,
+      "msg": "FOLLOW home (44 wp, idx 12) | pose=(6.07,-1.51,155deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.82m | GT오차 0.031 m / 0.0 deg GT=(6.04,-1.52) cmd_v=0.18 cmd_w=-0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 768.5120000000001,
+      "msg": "FOLLOW home (44 wp, idx 16) | pose=(5.26,-1.11,152deg) 탐색률=32.7% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.85m | GT오차 0.032 m / 0.0 deg GT=(5.23,-1.11) cmd_v=0.18 cmd_w=-0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 773.568,
+      "msg": "FOLLOW home (44 wp, idx 21) | pose=(4.50,-0.70,153deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.92m | GT오차 0.036 m / 0.0 deg GT=(4.47,-0.71) cmd_v=0.18 cmd_w=+0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 778.624,
+      "msg": "FOLLOW home (44 wp, idx 24) | pose=(3.73,-0.33,160deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.94m | GT오차 0.041 m / 0.0 deg GT=(3.69,-0.32) cmd_v=0.16 cmd_w=+0.11 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 783.6800000000001,
+      "msg": "FOLLOW home (44 wp, idx 24) | pose=(3.53,-0.28,-101deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.94m | GT오차 0.043 m / 0.0 deg GT=(3.48,-0.27) cmd_v=0.00 cmd_w=-0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 788.736,
+      "msg": "FOLLOW home (44 wp, idx 24) | pose=(3.51,-0.31,-95deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.95m | GT오차 0.050 m / 0.0 deg GT=(3.47,-0.30) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 793.792,
+      "msg": "FOLLOW home (44 wp, idx 24) | pose=(3.51,-0.32,-109deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.95m | GT오차 0.050 m / 0.0 deg GT=(3.47,-0.31) cmd_v=0.00 cmd_w=-0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 798.8480000000001,
+      "msg": "FOLLOW home (44 wp, idx 24) | pose=(3.51,-0.34,-99deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.95m | GT오차 0.050 m / 0.0 deg GT=(3.46,-0.32) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 803.904,
+      "msg": "FOLLOW home (44 wp, idx 24) | pose=(3.51,-0.35,-77deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.95m | GT오차 0.050 m / 0.0 deg GT=(3.47,-0.34) cmd_v=0.00 cmd_w=-0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 808.96,
+      "msg": "FOLLOW home (44 wp, idx 24) | pose=(3.51,-0.36,-127deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.95m | GT오차 0.050 m / 0.0 deg GT=(3.46,-0.35) cmd_v=0.00 cmd_w=-0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 814.016,
+      "msg": "FOLLOW home (44 wp, idx 24) | pose=(3.51,-0.38,-118deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.95m | GT오차 0.049 m / 0.0 deg GT=(3.46,-0.36) cmd_v=0.00 cmd_w=+0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 814.464,
+      "msg": "경로 추종 20초간 진전 없음 (cmd_w=+0.80) → 목표 포기·재계획"
+    },
+    {
+      "t": 819.072,
+      "msg": "FOLLOW home (17 wp, idx 1) | pose=(3.25,-0.47,175deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.95m | GT오차 0.052 m / 0.0 deg GT=(3.20,-0.46) cmd_v=0.07 cmd_w=-0.24 scale=0.5 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 824.128,
+      "msg": "FOLLOW home (17 wp, idx 4) | pose=(2.59,-0.25,166deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.97m | GT오차 0.047 m / 0.0 deg GT=(2.55,-0.23) cmd_v=0.17 cmd_w=+0.06 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 829.184,
+      "msg": "FOLLOW home (17 wp, idx 8) | pose=(1.71,-0.12,173deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=2.99m | GT오차 0.043 m / 0.0 deg GT=(1.68,-0.10) cmd_v=0.18 cmd_w=-0.00 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 834.24,
+      "msg": "FOLLOW home (17 wp, idx 13) | pose=(0.81,-0.01,176deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=3.03m | GT오차 0.029 m / 0.0 deg GT=(0.79,0.00) cmd_v=0.18 cmd_w=+0.01 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 839.296,
+      "msg": "RETURN 방향 정렬 | pose=(0.17,0.02,119deg) 탐색률=32.8% 시야=77% 남은목표=0 헛돔=0.01m 보정=3.03m | GT오차 0.035 m / 0.0 deg GT=(0.14,0.04) cmd_v=0.00 cmd_w=-0.80 scale=1.0 static=0.0s run=['Action: FollowPath [R]', 'Action: FollowPath [R]', 'Action: AlignToStartYaw [R]', 'Action: Idle [R]']"
+    },
+    {
+      "t": 842.5600000000001,
+      "msg": "미션 종료: 복귀 오차 0.168 m, 방향 오차 2.7 deg, 구출 2개"
+    }
+  ],
+  "gt_pos_err_max_m": 0.09745742695382645,
+  "gt_pos_err_final_m": 0.03514037005677251
+}

@@ -22,6 +22,7 @@ from bt_core import Blackboard, describe  # noqa: E402
 from bt_mission import build_tree  # noqa: E402
 from commands import CommandSource  # noqa: E402
 from report import Reporter  # noqa: E402
+from rl_shadow import ShadowPolicy  # noqa: E402
 from bridge import StatusBridge  # noqa: E402
 
 
@@ -48,31 +49,32 @@ class App:
         self.right_motor = r.getDevice("right wheel motor")
         self.left_enc = self.left_motor.getPositionSensor()
         self.right_enc = self.right_motor.getPositionSensor()
-        if self.left_enc is not None:
-            self.left_enc.enable(self.ts)
-        if self.right_enc is not None:
-            self.right_enc.enable(self.ts)
-        self.compass = r.getDevice("compass")
+        self.left_enc.enable(self.ts)
+        self.right_enc.enable(self.ts)
+        self.heading_source = str(cfg.get("heading_source", "gyro"))
+        self.compass = r.getDevice("compass") if self.heading_source == "compass" else None
         if self.compass is not None:
             self.compass.enable(self.ts)
+        self.gyro = r.getDevice("gyro") if self.heading_source == "gyro" else None
+        if self.gyro is not None:
+            self.gyro.enable(self.ts)
         self.lidar = r.getDevice("LDS-01")
-        if self.lidar is not None:
-            self.lidar.enable(self.ts)
+        self.lidar.enable(self.ts)
         self.camera = r.getDevice("camera")
-        if self.camera is not None:
-            self.camera.enable(self.ts * int(self.cfg.get("camera_period_mult", 2)))
+        self.camera.enable(self.ts * int(self.cfg.get("camera_period_mult", 2)))
         self.keyboard = Keyboard()
-        if self.keyboard is not None:
-            self.keyboard.enable(self.ts)
+        self.keyboard.enable(self.ts)
 
         self.grid = OccupancyGrid(cfg)
         self.reporter = Reporter(self.grid, cfg, cfg.get("show_window", True))
         self.log = lambda msg: self.reporter.log(self.robot.getTime(), msg)
-        self.localizer = Localizer(self.left_enc, self.right_enc, self.compass, cfg)
+        self.localizer = Localizer(self.left_enc, self.right_enc, self.compass, cfg, gyro=self.gyro)
         self.motion = Motion(self.left_motor, self.right_motor, cfg)
         self.scan_monitor = ScanMotionMonitor()
         self.detector = AppleDetector(self.camera, cfg)
         self.commands = CommandSource(self.keyboard, self.log)
+        # 팀이 학습한 PPO 정책을 같은 관측으로 추론만 하고 실제 명령과 비교(섀도 모드). 주행에는 관여하지 않는다.
+        self.rl_shadow = ShadowPolicy(cfg, self.log) if cfg.get("rl_shadow", True) else None
 
         self.bb = Blackboard()
         self.bb.set("targets_left", int(cfg["target_count"]))
@@ -121,6 +123,12 @@ class App:
         return (rx, ry, wrap_angle(yaw - yaw0))
 
     def finish_report(self):
+        if self.rl_shadow is not None:
+            self.stats["rl_shadow"] = self.rl_shadow.summary()
+            if self.rl_shadow.enabled:
+                r = self.stats["rl_shadow"]
+                self.log(f"[RL] 섀도 정책 비교: 샘플 {r['samples']}개, 회전 방향 일치 {r['turn_sign_agreement']*100:.0f}%, "
+                         f"평균 |Δv| {r['mean_abs_dv']:.2f} m/s, |Δw| {r['mean_abs_dw']:.2f} rad/s")
         s = self.reporter.save(self.costmap, self.bb, self.detector, self.stats, tag="final")
         self.log(f"결과 저장: output/ (탐색률 {s['explored_ratio']*100:.1f}%, 이동 {s['path_length_m']:.1f} m)")
 
@@ -129,7 +137,7 @@ class App:
         cfg = self.cfg
         r = self.robot
         self.log(f"tb3_mission 시작. timestep={self.ts} ms, 목표={cfg['target_colors']} x{cfg['target_count']}, "
-                 f"제한시간={cfg['time_limit_s']}s")
+                 f"제한시간={cfg['time_limit_s']}s, 방향 센서={self.localizer.heading_source}")
         for line in describe(self.tree.root):
             print("  " + line)
 
@@ -156,10 +164,10 @@ class App:
                 self._last_match_t = t
                 m = self.grid.match_scan(pose, ranges, float(cfg["scan_match_search_m"]), float(cfg["scan_match_step_m"]))
                 if m is not None:
-                    dx, dy, s0, s1 = m
-                    if (dx != 0.0 or dy != 0.0) and s1 - s0 >= float(cfg["scan_match_min_gain"]):
+                    dx, dy, dyaw, s0, s1 = m
+                    if (dx != 0.0 or dy != 0.0 or dyaw != 0.0) and s1 - s0 >= float(cfg["scan_match_min_gain"]):
                         a = float(cfg.get("scan_match_apply", 0.7))
-                        self.localizer.correct(a * dx, a * dy)
+                        self.localizer.correct(a * dx, a * dy, 0.5 * dyaw)
                         pose = self.localizer.pose()
                         self.stats["scan_corrections"] += 1
             self.grid.update(pose, ranges, self.localizer.yaw_rate)
@@ -210,6 +218,9 @@ class App:
                                                 abs(wrap_angle(gt[2] - pose[2]))))
 
             self.tree.tick()
+
+            if self.rl_shadow is not None and self.rl_shadow.enabled and self._tick % 2 == 0:
+                self.rl_shadow.step(ranges, pose, self.bb.get("goal"), self.motion.cmd_v, self.motion.cmd_w)
             self.bridge.update()
 
             self.reporter.record_pose(t, pose)
@@ -225,7 +236,7 @@ class App:
                              f" run={[l.strip() for l in describe(self.tree.root) if '[R]' in l and 'Action' in l]}")
                 self.log(f"{self.bb.get('state_label')} | pose=({pose[0]:.2f},{pose[1]:.2f},{math.degrees(pose[2]):.0f}deg) "
                          f"탐색률={self.grid.explored_ratio()*100:.1f}% 시야={self.grid.viewed_ratio()*100:.0f}% 남은목표={self.bb.get('targets_left')} "
-                         f"헛돔={self.localizer.frozen_dist:.2f}m 보정={self.localizer.correction_dist:.2f}m{extra}")
+                         f"헛돔={self.localizer.frozen_dist:.2f}m 보정={self.localizer.correction_dist:.2f}m/{math.degrees(self.localizer.correction_yaw):.0f}deg{extra}")
 
             save_every = float(cfg.get("save_every_s", 0.0))
             if save_every > 0 and t - self._last_save_t >= save_every:

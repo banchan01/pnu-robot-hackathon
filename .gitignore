@@ -6,10 +6,16 @@ venv/
 logs/
 models/
 
+# Webots UI 상태 (사람마다 다름)
+worlds/.*.wbproj
+
+# 실행 환경별 파일 (Python 경로가 절대 경로)
+controllers/*/runtime.ini
 
 # tb3_mission / web console 실행 산출물 (로컬 전용)
-controllers/*/runtime.ini
 controllers/tb3_mission/output/
 controllers/tb3_mission/commands.txt
 controllers/tb3_mission/manual.json
 controllers/tb3_mission/live_output_dir.txt
+
+controllers/tb3_mission/live_io.json

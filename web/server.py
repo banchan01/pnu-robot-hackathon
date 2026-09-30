@@ -34,8 +34,7 @@ class Console:
     def __init__(self, ctrl_dir):
         self.ctrl_dir = ctrl_dir
         self.live_pointer = os.path.join(ctrl_dir, "live_output_dir.txt")
-        self.command_file = os.path.join(ctrl_dir, "commands.txt")
-        self.manual_file = os.path.join(ctrl_dir, "manual.json")
+        self.live_io = os.path.join(ctrl_dir, "live_io.json")
         self.drive_mode = "auto"                 # auto | manual (서버가 마지막으로 보낸 값)
         self.last_manual = {"v": 0.0, "w": 0.0}
         self.queue = deque()
@@ -47,6 +46,26 @@ class Console:
         threading.Thread(target=self._pump, daemon=True).start()
 
     pinned_output = None          # --output 으로 고정한 폴더
+
+    def _io(self):
+        """컨트롤러가 남긴 실제 입출력 파일 경로. 없으면 기본값."""
+        try:
+            with open(self.live_io, "r", encoding="utf-8") as f:
+                d = json.load(f)
+            if d.get("output_dir") and os.path.isdir(d["output_dir"]):
+                return d
+        except (OSError, ValueError):
+            pass
+        return {"command_file": os.path.join(self.ctrl_dir, "commands.txt"),
+                "manual_file": os.path.join(self.ctrl_dir, "manual.json")}
+
+    @property
+    def command_file(self):
+        return self._io().get("command_file", os.path.join(self.ctrl_dir, "commands.txt"))
+
+    @property
+    def manual_file(self):
+        return self._io().get("manual_file", os.path.join(self.ctrl_dir, "manual.json"))
 
     @property
     def output_dir(self):

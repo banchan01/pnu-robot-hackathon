@@ -109,6 +109,9 @@ _DEFAULTS = {
     "save_every_s": 0.0,
     "camera_period_mult": 2,
 
+    "heading_source": "gyro",
+    "rl_shadow": True,
+    "rl_policy_file": "amr_win1_policy.pt",
     "compass_sign": -1.0,
     "scan_match_every_s": 0.0,
     "scan_match_search_m": 0.06,
