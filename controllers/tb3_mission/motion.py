@@ -99,6 +99,7 @@ class Motion:
         self.right_min = float("inf")
         self._path_id = None
         self._idx = 0
+        self._rot_ticks = 0
         self._hist = []          # (t, x, y)
         self.front_min = float("inf")
 
@@ -149,7 +150,9 @@ class Motion:
         if f < self.stop_dist:
             self.speed_scale = 0.0
             return "blocked"
-        if f < self.slow_dist:
+        # 좁은 통로(수납장 문짝 등 얇은 장애물이 빔 사이로 빠지는 곳)에서는 전방 ±80도 안에
+        # 0.35 m 이내 장애물이 있어도 감속한다
+        if f < self.slow_dist or min(l, r) < 0.35:
             self.speed_scale = 0.5
             return "slow"
         self.speed_scale = 1.0
@@ -158,26 +161,14 @@ class Motion:
     def moving_cmd(self):
         return abs(self.cmd_v) > 0.02 or abs(self.cmd_w) > 0.2
 
-    def is_stuck(self, t, static_for, pose=None):
-        """움직이라는 명령이 있는데 LiDAR 스캔 또는 (x, y) 위치가 stuck_window 이상 정지해 있으면 끼임."""
+    def is_stuck(self, t, static_for):
+        """움직이라는 명령이 있는데 LiDAR 스캔이 stuck_window 이상 정지해 있으면 끼임."""
         if not self.moving_cmd():
             self._stuck_t0 = None
-            self._hist = []
             return False
-        # 1. LiDAR 스캔 기반 끼임 판정
-        if static_for >= self.stuck_window:
-            return True
-        # 2. 위치 변위 기반 끼임/회전 헛돔 판정
-        if pose is not None:
-            self._hist.append((t, pose[0], pose[1]))
-            while len(self._hist) > 1 and t - self._hist[0][0] > self.stuck_window:
-                self._hist.pop(0)
-            if t - self._hist[0][0] >= self.stuck_window * 0.9:
-                t0, x0, y0 = self._hist[0]
-                dist = math.hypot(pose[0] - x0, pose[1] - y0)
-                if dist < self.stuck_move:
-                    return True
-        return False
+        if static_for <= 0.0:
+            return False
+        return static_for >= self.stuck_window
 
     def clear_stuck(self):
         self._hist = []
@@ -211,14 +202,12 @@ class Motion:
             self.stop()
             return True
 
-        # Look-ahead 지점: 경로 거리 기준
-        acc = 0.0
-        la = path[best]
-        for k in range(best, n - 1):
-            seg = math.hypot(path[k + 1][0] - path[k][0], path[k + 1][1] - path[k][1])
-            acc += seg
-            la = path[k + 1]
-            if acc >= self.lookahead:
+        # Look-ahead 지점: 현재 인덱스 이후에서 로봇과의 직선 거리가 처음으로 lookahead 이상이 되는 waypoint
+        # (경로가 접혀 되돌아오는 구간에서 로봇 뒤쪽 점을 고르는 진동을 막는다)
+        la = path[-1]
+        for k in range(best, n):
+            if math.hypot(path[k][0] - x, path[k][1] - y) >= self.lookahead:
+                la = path[k]
                 break
 
         dx = la[0] - x
@@ -230,7 +219,13 @@ class Motion:
 
         if abs(err) > self.heading_rotate:
             self.set_cmd(0.0, math.copysign(self.w_rotate, err))
+            self._rot_ticks += 1
+            if self._rot_ticks >= 60 and self._rot_ticks % 75 == 0:      # 약 4초 이상 회전이 이어지면 진단 출력
+                print(f"[follow-diag] rot_ticks={self._rot_ticks} pose=({x:.2f},{y:.2f},{math.degrees(yaw):.0f}deg) "
+                      f"best={best}/{n} la=({la[0]:.2f},{la[1]:.2f}) d_la={math.hypot(dx, dy):.2f} err={math.degrees(err):.0f}deg "
+                      f"path0=({path[0][0]:.2f},{path[0][1]:.2f}) pathN=({path[-1][0]:.2f},{path[-1][1]:.2f})", flush=True)
             return False
+        self._rot_ticks = 0
 
         d2 = rx * rx + ry * ry
         k = 2.0 * ry / d2 if d2 > 1e-6 else 0.0

@@ -145,6 +145,7 @@ class Reporter:
         img = self.render(costmap, bb, detector)
         cv2.imwrite(os.path.join(OUTPUT_DIR, f"map_{tag}.png"), img)
         np.save(os.path.join(OUTPUT_DIR, f"logodds_{tag}.npy"), self.grid.logodds)
+        np.save(os.path.join(OUTPUT_DIR, f"viewed_{tag}.npy"), self.grid.viewed)
         with open(os.path.join(OUTPUT_DIR, f"trajectory_{tag}.csv"), "w") as f:
             f.write("t,x,y,yaw\n")
             for (t, x, y, yaw) in self.traj:

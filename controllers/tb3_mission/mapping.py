@@ -257,7 +257,7 @@ class OccupancyGrid:
         return float(self.observed.mean())
 
     # ---------- 카메라 시야 지도 (Sweep 단계용) ----------
-    def mark_viewed(self, pose, costmap, max_range=3.0):
+    def mark_viewed(self, pose, costmap, max_range=2.0):
         """카메라 시야 원뿔(±FOV/2, max_range) 안에서 장애물에 가려지지 않은 셀을 viewed로 표시한다."""
         x, y, yaw = pose
         cx = x + CAM_OFFSET_X * math.cos(yaw)
@@ -277,14 +277,17 @@ class OccupancyGrid:
         n = free.sum()
         return float((free & self.viewed).sum() / n) if n else 0.0
 
-    def sweep_targets(self, costmap, pose, blacklist=(), now=0.0, min_cells=25):
-        """카메라가 아직 보지 못한 자유 공간 덩어리 [(x, y, size, dist_m)] (점수순)."""
-        cand = (costmap < self.frontier_max_cost) & self.observed & ~self.viewed
+    def sweep_targets(self, costmap, pose, blacklist=(), now=0.0, min_cells=12):
+        """카메라가 아직 보지 못한 비점유 관측 셀 덩어리 [(x, y, size, dist_m)] (가까운 순).
+        벽 옆 틈(팽창 구역)도 후보에 포함한다. 목표는 계획 단계에서 근처 통행 가능 셀로 스냅된다."""
+        cand = (costmap != LETHAL) & (costmap != UNKNOWN) & self.observed & ~self.viewed
         n, labels, stats, centroids = cv2.connectedComponentsWithStats(cand.astype(np.uint8), connectivity=8)
         if n <= 1:
             return []
         r0, c0 = self.world_to_grid(pose[0], pose[1])
         dist = self.wavefront_distance(costmap, (r0, c0))
+        # 통행 불가 셀(팽창 구역)에도 근처 통행 가능 셀의 거리를 부여 (9x9 최대 필터)
+        dist = cv2.dilate(dist.astype(np.float32), np.ones((9, 9), np.uint8)).astype(np.int32)
         out = []
         for k in range(1, n):
             size = int(stats[k, cv2.CC_STAT_AREA])
@@ -324,9 +327,12 @@ class OccupancyGrid:
         self._solid_dirty = False
         return self._solid_dist_cache
 
-    def match_scan(self, pose, ranges, search_m=0.06, step_m=0.01, min_hits=40, sigma_cells=1.5):
-        """상관 스캔 매칭(평행 이동만, 완전 벡터화). 방향은 나침반이 정확하므로 (dx, dy)만 탐색.
-        반환: (dx, dy, score_before, score_after) 또는 None."""
+    def match_scan(self, pose, ranges, search_m=0.06, step_m=0.01, min_hits=40, sigma_cells=1.5,
+                   yaw_search_deg=1.0, yaw_step_deg=0.5):
+        """상관 스캔 매칭 (x, y, yaw), 완전 벡터화.
+        확신 있는 점유 셀까지의 거리 변환 위에서 스캔 반사점이 가장 잘 얹히는 (dx, dy, dyaw)를 찾는다.
+        자이로 적분 방향의 누적 오차도 여기서 보정한다.
+        반환: (dx, dy, dyaw, score_before, score_after) 또는 None."""
         x, y, yaw = pose
         r = np.asarray(ranges, dtype=np.float32)
         hit = np.isfinite(r) & (r >= 0.3) & (r < LIDAR_MAX - 0.05)
@@ -336,24 +342,33 @@ class OccupancyGrid:
         if dist is None:
             return None
         r = r[hit][::2]
-        ang = (LIDAR_ANGLES[hit] + yaw)[::2]
-        sx = x + LIDAR_OFFSET_X * math.cos(yaw)
-        sy = y + LIDAR_OFFSET_X * math.sin(yaw)
-        ex = sx + r * np.cos(ang)
-        ey = sy + r * np.sin(ang)
-
+        a0 = LIDAR_ANGLES[hit][::2]
         n = int(round(search_m / step_m))
         offs = (np.arange(-n, n + 1) * step_m).astype(np.float32)
         k = offs.size
-        # (k, N) 행/열 인덱스를 한 번에 만든 뒤 (k_y, k_x, N)으로 조합
-        cols = ((ex[None, :] + offs[:, None] - self.x0) / self.res).astype(np.int32)   # dx별
-        rows = ((ey[None, :] + offs[:, None] - self.y0) / self.res).astype(np.int32)   # dy별
-        cols = np.clip(cols, 0, self.cols - 1)
-        rows = np.clip(rows, 0, self.rows - 1)
-        R = np.broadcast_to(rows[:, None, :], (k, k, rows.shape[1]))
-        C = np.broadcast_to(cols[None, :, :], (k, k, cols.shape[1]))
-        d = dist[R, C]
-        score = np.exp(-(d * d) / (2.0 * sigma_cells * sigma_cells)).mean(axis=2)      # (k_y, k_x)
-        base = float(score[n, n])
-        iy, ix = np.unravel_index(int(np.argmax(score)), score.shape)
-        return (float(offs[ix]), float(offs[iy]), base, float(score[iy, ix]))
+        ny = int(round(yaw_search_deg / yaw_step_deg))
+        yoffs = np.radians(np.arange(-ny, ny + 1) * yaw_step_deg)
+
+        best = None
+        base = None
+        for j, dy_yaw in enumerate(yoffs):
+            yw = yaw + dy_yaw
+            sx = x + LIDAR_OFFSET_X * math.cos(yw)
+            sy = y + LIDAR_OFFSET_X * math.sin(yw)
+            ex = sx + r * np.cos(a0 + yw)
+            ey = sy + r * np.sin(a0 + yw)
+            cols = np.clip(((ex[None, :] + offs[:, None] - self.x0) / self.res).astype(np.int32), 0, self.cols - 1)
+            rows = np.clip(((ey[None, :] + offs[:, None] - self.y0) / self.res).astype(np.int32), 0, self.rows - 1)
+            R = np.broadcast_to(rows[:, None, :], (k, k, rows.shape[1]))
+            C = np.broadcast_to(cols[None, :, :], (k, k, cols.shape[1]))
+            d = dist[R, C]
+            score = np.exp(-(d * d) / (2.0 * sigma_cells * sigma_cells)).mean(axis=2)      # (k_y, k_x)
+            if j == ny:
+                base = float(score[n, n])
+            iy, ix = np.unravel_index(int(np.argmax(score)), score.shape)
+            sc = float(score[iy, ix])
+            if best is None or sc > best[0]:
+                best = (sc, float(offs[ix]), float(offs[iy]), float(dy_yaw))
+        if best is None or base is None:
+            return None
+        return (best[1], best[2], best[3], base, best[0])
