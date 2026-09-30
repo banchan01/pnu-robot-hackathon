@@ -16,6 +16,10 @@ Webots R2025a와 TurtleBot3 Burger로, **지도 없는 아파트를 LiDAR·엔�
 
 세부 문서: [컨트롤러 README](controllers/tb3_mission/README.md) · [웹 콘솔 README](web/README.md) · [강화학습 README](rl/README.md)
 
+![웹 지휘 콘솔](docs/images/web-console.png)
+
+> 웹 지휘 콘솔: 왼쪽에 실시간 지도와 탐지 표식·상태 그래프, 가운데에 로봇 시점·상공 시점·지도 전환 화면과 자동/수동 조종, 오른쪽에 직접 지휘와 현장 로그.
+
 ---
 
 ## 1. 시나리오
