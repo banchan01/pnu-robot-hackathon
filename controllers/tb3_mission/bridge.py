@@ -16,12 +16,14 @@ import os
 
 import cv2
 
-from config import OUTPUT_DIR, CTRL_DIR
+from config import OUTPUT_DIR, CTRL_DIR, COMMAND_FILE
+from commands import MANUAL_FILE
 from bt_core import describe
 
-# 웹 서버가 현재 실행 중인 컨트롤러의 출력 폴더를 찾도록 고정 위치에 포인터를 남긴다.
-# (OUTPUT_DIR 은 TB3_OUTPUT_DIR 환경 변수로 바뀔 수 있다.)
-LIVE_POINTER = os.path.join(CTRL_DIR, "live_output_dir.txt")
+# 웹 서버가 현재 실행 중인 컨트롤러의 실제 입출력 파일 위치를 찾도록 고정 위치에 포인터를 남긴다.
+# (OUTPUT_DIR, COMMAND_FILE 은 TB3_OUTPUT_DIR / TB3_COMMAND_FILE 환경 변수로 바뀔 수 있다.)
+LIVE_POINTER = os.path.join(CTRL_DIR, "live_output_dir.txt")   # 하위 호환
+LIVE_IO = os.path.join(CTRL_DIR, "live_io.json")              # 출력 폴더 + 명령/수동 파일 경로
 
 
 def _f(v, nd=3):
@@ -72,6 +74,10 @@ class StatusBridge:
         try:
             with open(LIVE_POINTER, "w", encoding="utf-8") as f:
                 f.write(os.path.abspath(OUTPUT_DIR) + "\n")
+            with open(LIVE_IO, "w", encoding="utf-8") as f:
+                json.dump({"output_dir": os.path.abspath(OUTPUT_DIR),
+                           "command_file": os.path.abspath(COMMAND_FILE),
+                           "manual_file": os.path.abspath(MANUAL_FILE)}, f)
         except OSError:
             pass
         self.status_path = os.path.join(OUTPUT_DIR, "status.json")
