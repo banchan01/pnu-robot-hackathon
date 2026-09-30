@@ -13,3 +13,4 @@ controllers/tb3_mission/output/
 controllers/tb3_mission/commands.txt
 controllers/tb3_mission/manual.json
 controllers/tb3_mission/live_output_dir.txt
+rl/logs/
